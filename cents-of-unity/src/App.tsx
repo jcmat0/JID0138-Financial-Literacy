@@ -1,10 +1,15 @@
 import React, { FC } from 'react'
-import { Button } from 'antd'
 import './App.css'
+import Home from './home/Home'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
 const App: FC = () => (
   <div className="App">
-    <Button type="primary">Button</Button>
+    <Router>
+      <Switch>
+        <Route exact path='/' component={Home}/>
+      </Switch>
+    </Router>
   </div>
 )
 
