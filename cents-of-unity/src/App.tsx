@@ -9,9 +9,10 @@ const App: FC = () => (
     <Router>
       <Switch>
         <Route exact path='/' component={Home}/>
-        <Route exact path='/profile' component={Profile}/>
+        <Route exact path='/profile' component={Profile} />
       </Switch>
     </Router>
+  </div>
 )
 
 export default App
