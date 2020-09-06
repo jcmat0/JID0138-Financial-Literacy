@@ -1,106 +1,134 @@
+// import defaultImage from 'logo192.png'
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  List,
+  PageHeader,
+  Typography
+} from 'antd'
 import React, { Component } from 'react'
-//import { Button } from 'antd'
-import ReactDOM from "react-dom";
-//import './Profile.css'
-import defaultImage from 'logo192.png'
-import EdiText from 'react-editext'
 
-function Image() {
-  const uploadedImage = React.useRef(null);
-  const imageUploader = React.useRef(null);
-  //const defaultImage = <img src ="logo192.png" alt =""/>
+import { PhoneOutlined, SolutionOutlined } from '@ant-design/icons'
 
-  const handleImageUpload = (e : any) => {
-    const [file] = e.target.files;
-    if (file) {
-      const reader = new FileReader();
-
-      const { current } = uploadedImage;
-      
-      //if (current !== undefined) {
-      //current.file = file;
-      //reader.onload = e => {
-      //  current.src = e.target.result;
-      //};
-      // reader.readAsDataURL(file);
-    //}
-
-    }
-  };
-
-  return (  
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center"
-      }}
-    >
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleImageUpload}
-        ref={imageUploader}
-        style={{
-          display: "none"
-        }}
-      />
-      <div
-        style={{
-          height: "60px",
-          width: "60px",
-          border: "1px dashed black"
-        }}
-        //onClick={() => imageUploader.current.click()}
-      >
-        <img
-          ref={uploadedImage}
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "static"
-          }}
-        alt = ""/>
-      </div>
-      Click to upload Image
-
-    </div>
-  )
+const { Title } = Typography
+type propsType = {
+  name: string
+  email?: string
+  phoneNumber?: string
 }
 
-class Profile extends Component{
+// function Image() {
+//   const uploadedImage = React.useRef(null)
+//   const imageUploader = React.useRef(null)
+//   //const defaultImage = <img src ="logo192.png" alt =""/>
 
+//   const handleImageUpload = (e: any) => {
+//     const [file] = e.target.files
+//     if (file) {
+//       const reader = new FileReader()
+
+//       const { current } = uploadedImage
+
+//       //if (current !== undefined) {
+//       //current.file = file;
+//       //reader.onload = e => {
+//       //  current.src = e.target.result;
+//       //};
+//       // reader.readAsDataURL(file);
+//       //}
+//     }
+//   }
+
+//   return (
+//     <div
+//       style={{
+//         display: 'flex',
+//         flexDirection: 'column',
+//         alignItems: 'center',
+//         justifyContent: 'center'
+//       }}
+//     >
+//       <input
+//         type="file"
+//         accept="image/*"
+//         onChange={handleImageUpload}
+//         ref={imageUploader}
+//         style={{
+//           display: 'none'
+//         }}
+//       />
+//       <div
+//         style={{
+//           height: '60px',
+//           width: '60px',
+//           border: '1px dashed black'
+//         }}
+//         //onClick={() => imageUploader.current.click()}
+//       >
+//         <img
+//           ref={uploadedImage}
+//           style={{
+//             width: '100%',
+//             height: '100%',
+//             position: 'static'
+//           }}
+//           alt=""
+//         />
+//       </div>
+//       Click to upload Image
+//     </div>
+//   )
+// }
+
+class Profile extends Component<propsType> {
   onSave = (val: any) => {
     console.log('Edited Value-> ', val)
   }
+  onFinish = (values: any) => {
+    console.log('Success:', values)
+  }
 
   render() {
+    const { name, email, phoneNumber } = this.props
+    const classes = [
+      'Financial Learning Curriculum',
+      'Second Class Name',
+      'Third Class Name'
+    ]
     return (
       <div>
-  <h1> Profile for 'User'</h1>
-      <p>Name: XXXX</p> 
-      <p>Classes enrolled in:</p>
-      <li> Financial Learning Cirriculum</li>
-      <p>Contact Information:</p>
-      <li>    Phone Number:  
-      <EdiText
-      type = 'text'
-      value = 'Type your info here'
-      onSave = {this.onSave}
-      /></li>
-      <li>    Email:  
-      <EdiText
-      type = 'text'
-      value = 'Type your info here'
-      onSave = {this.onSave}
-      /></li>
+        <PageHeader
+          className="site-page-header"
+          title={<Title> Profile </Title>}
+          subTitle={name}
+        />
+        <List
+          header={<Title level={2}> Classes </Title>}
+          dataSource={classes}
+          renderItem={(item) => <List.Item>{item}</List.Item>}
+        />
+        <Divider />
+        <Title level={2}> Contact Information </Title>
+        <Form name="basic" onFinish={this.onFinish}>
+          <Form.Item label="Phone Number: " name="phoneNumber">
+            <Input prefix={<PhoneOutlined />} placeholder={phoneNumber} />
+          </Form.Item>
+
+          <Form.Item label="Email: " name="email">
+            <Input prefix={<SolutionOutlined />} placeholder={email} />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
       </div>
     )
   }
-
 }
 
-const rootElement = document.getElementById("root");
-ReactDOM.render(<Profile />, rootElement);
 export default Profile
