@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 //import { Button } from 'antd'
 import ReactDOM from "react-dom";
-//import '/profile.css'
+//import './Profile.css'
 import defaultImage from 'logo192.png'
 import EdiText from 'react-editext'
 
