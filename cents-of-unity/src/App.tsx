@@ -1,15 +1,14 @@
 import React, { FC } from 'react'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import './App.css'
 import Home from './home/Home'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import Profile from './components/profile/Profile'
 
 const App: FC = () => (
   <div className="App">
     <Router>
       <Switch>
         <Route exact path='/' component={Home}/>
-        <Route exact path='/profile' component={Profile} />
+        <Route exact path='/profile' component={Home} />
       </Switch>
     </Router>
   </div>
