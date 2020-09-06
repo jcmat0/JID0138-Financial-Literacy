@@ -13,5 +13,4 @@ const App: FC = () => (
     </Router>
   </div>
 )
-
 export default App
