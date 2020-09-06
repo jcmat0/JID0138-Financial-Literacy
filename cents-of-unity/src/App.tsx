@@ -1,12 +1,16 @@
 import React, { FC } from 'react'
-import { Button } from 'antd'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import './App.css'
-import Profile from './components/profile/Profile'
+import Home from './home/Home'
 
 const App: FC = () => (
   <div className="App">
-    <Profile></Profile>
+    <Router>
+      <Switch>
+        <Route exact path='/' component={Home}/>
+        <Route exact path='/profile' component={Home} />
+      </Switch>
+    </Router>
   </div>
 )
-
 export default App
