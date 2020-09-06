@@ -122,7 +122,7 @@ class Profile extends Component<propsType> {
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Submit
+              Save Changes
             </Button>
           </Form.Item>
         </Form>
