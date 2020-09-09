@@ -92,7 +92,7 @@ class Profile extends Component<propsType> {
     console.log('Success:', values)
   }
 
-  render() {
+  public render() {
     const { name, email, phoneNumber } = this.props
     const classes = [
       'Financial Learning Curriculum',
