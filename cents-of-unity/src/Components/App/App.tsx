@@ -11,6 +11,7 @@ import { SignIn } from '../SignIn'
 import { SignUp } from '../SignUp'
 import { Navigation } from '../Navigation/Navigation'
 import { Layout, Menu } from 'antd'
+import '../../../node_modules/antd/dist/antd.css'
 import Profile from '../profile/Profile'
 
 const { Header, Content, Footer } = Layout
