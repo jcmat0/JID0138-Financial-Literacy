@@ -35,13 +35,13 @@ class Firebase {
 		return this.auth.signOut()
 	}
 
-	async register(name, email, password) {
+	async register(name, email, password, role) {
 		console.log('in register')
 		await this.auth.createUserWithEmailAndPassword(email, password)
 		console.log('created user', this.auth.currentUser)
 		this.database.ref(`/users/${this.auth.currentUser?.uid}`).set({
-			email,
 			name,
+			role,
 		})
 		return this.auth.currentUser?.updateProfile({
 			displayName: name
@@ -83,6 +83,10 @@ class Firebase {
 
 	async getCurrentUserEmail() {
 		return this.auth.currentUser?.email || "No Email"
+	}
+
+	async updateUserEmail(email: string) {
+		return this.auth.currentUser && this.auth.currentUser.updateEmail(email )
 	}
 }
 

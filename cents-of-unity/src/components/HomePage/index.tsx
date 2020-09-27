@@ -42,7 +42,10 @@ function HomePage(props) {
 					<VerifiedUserOutlined />
 				</Avatar>
 				<Typography component="h1" variant="h5">
-					Hello Guest!
+					Hello Guest! 
+				</Typography>
+				<Typography component="h1" variant="subtitle1">
+					This is the Home Page of Cents-of-Unity. Login or Create an Account to get started.
 				</Typography>
 				<Button
 					type="submit"

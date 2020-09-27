@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Typography, Paper, Avatar, CircularProgress, Button } from '@material-ui/core'
+import { Typography, FormControl, InputLabel, Input, Paper, Avatar, CircularProgress, Button } from '@material-ui/core'
 import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
 import withStyles from '@material-ui/core/styles/withStyles'
 import firebase from '../firebase'
@@ -38,10 +38,10 @@ function Dashboard(props: { history?: any; classes?: any }) {
 
 	const [phone, setPhone] = useState('')
 	const [email, setEmail] = useState('')
+	const [newEmail, setNewEmail] = useState('')
 
 	useEffect(() => {
 		if (firebase.getCurrentUsername()) {
-			console.log('logged in?')
 			firebase.getCurrentUserPhone().then(setPhone)
 			firebase.getCurrentUserEmail().then(setEmail)
 		}
@@ -69,6 +69,25 @@ function Dashboard(props: { history?: any; classes?: any }) {
 				<Typography component="h1" variant="h5">
 					Your email: {email ? `${email}` : <CircularProgress size={20} />}
 				</Typography>
+
+				<form className={classes.form} onSubmit={e =>  e.preventDefault() }>
+					<FormControl margin="normal" required fullWidth>
+						<InputLabel htmlFor="email">Change Email Address</InputLabel>
+						<Input id="email" name="email" placeholder={email} autoComplete="off" value={newEmail} onChange={e => setNewEmail(e.target.value)}  />
+					</FormControl>
+
+					<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						color="primary"
+						onClick={onRegister}
+						className={classes.submit}>
+						Change Email
+          			</Button>
+
+				</form>
+				
 				<Button
 					type="submit"
 					fullWidth
@@ -81,6 +100,14 @@ function Dashboard(props: { history?: any; classes?: any }) {
 			</Paper>
 		</main>
 	)
+	
+	async function onRegister() {
+		try {
+			await firebase.updateUserEmail(newEmail)
+		} catch(error) {
+			alert(error.message)
+		}
+	}
 
 	async function logout() {
 		await firebase.logout()
