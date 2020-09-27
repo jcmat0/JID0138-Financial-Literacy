@@ -35,13 +35,12 @@ class Firebase {
 		return this.auth.signOut()
 	}
 
-	async register(name, email, password, role) {
+	async register(name, email, password) {
 		console.log('in register')
 		await this.auth.createUserWithEmailAndPassword(email, password)
 		console.log('created user', this.auth.currentUser)
 		this.database.ref(`/users/${this.auth.currentUser?.uid}`).set({
 			name,
-			role,
 		})
 		return this.auth.currentUser?.updateProfile({
 			displayName: name
@@ -56,8 +55,18 @@ class Firebase {
 		// return this.db.doc(`cents-of-unity/${this.auth.currentUser.uid}`).set({
 		// 	quote
 		// })
-		return this.database.ref('users/' + this.auth.currentUser?.uid).set({
-			phone
+		return this.database.ref('users/' + this.auth.currentUser?.uid).update({
+			"phone": phone
+		})
+	}
+
+	addRole(role) {
+		if(!this.auth.currentUser) {
+			return alert('Not authorized')
+		}
+
+		return this.database.ref('users/' + this.auth.currentUser?.uid).update({
+			"role": role
 		})
 	}
 
@@ -73,12 +82,18 @@ class Firebase {
 
 	async getCurrentUserPhone() {
 		const phone = await this.database.ref(`users/${this.auth.currentUser?.uid}`).once('value').then(function(view) {
+			console.log(view.val())
 			return view.val().phone || 'No Phone Number'
 		})
-		console.log(phone)
-		// return 'quote' 
 		return phone
-		// quote.get('quote')
+	}
+
+	async getCurrentUserRole() {
+		const role = await this.database.ref(`users/${this.auth.currentUser?.uid}`).once('value').then(function(view) {
+			console.log(view.val())
+			return view.val().role || 'No Phone Number'
+		})
+		return role
 	}
 
 	async getCurrentUserEmail() {
@@ -86,7 +101,11 @@ class Firebase {
 	}
 
 	async updateUserEmail(email: string) {
-		return this.auth.currentUser && this.auth.currentUser.updateEmail(email )
+		return this.auth.currentUser && this.auth.currentUser.updateEmail(email)
+	}
+
+	async updateUserPhone(phone) {
+		return this.auth.currentUser && this.addPhone(phone)
 	}
 }
 

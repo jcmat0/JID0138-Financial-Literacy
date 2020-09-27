@@ -38,12 +38,15 @@ function Dashboard(props: { history?: any; classes?: any }) {
 
 	const [phone, setPhone] = useState('')
 	const [email, setEmail] = useState('')
+	const [role, setRole] = useState('')
 	const [newEmail, setNewEmail] = useState('')
+	const [newPhone, setNewPhone] = useState('')
 
 	useEffect(() => {
 		if (firebase.getCurrentUsername()) {
 			firebase.getCurrentUserPhone().then(setPhone)
 			firebase.getCurrentUserEmail().then(setEmail)
+			firebase.getCurrentUserRole().then(setRole)
 		}
 	}, [])
 
@@ -69,7 +72,9 @@ function Dashboard(props: { history?: any; classes?: any }) {
 				<Typography component="h1" variant="h5">
 					Your email: {email ? `${email}` : <CircularProgress size={20} />}
 				</Typography>
-
+				<Typography component="h1" variant="h5">
+					Your role: {role ? `${role}` : <CircularProgress size={20} />}
+				</Typography>
 				<form className={classes.form} onSubmit={e =>  e.preventDefault() }>
 					<FormControl margin="normal" required fullWidth>
 						<InputLabel htmlFor="email">Change Email Address</InputLabel>
@@ -79,13 +84,32 @@ function Dashboard(props: { history?: any; classes?: any }) {
 					<Button
 						type="submit"
 						fullWidth
+						disabled={newEmail.length === 0}
 						variant="contained"
 						color="primary"
-						onClick={onRegister}
+						onClick={changeEmail}
 						className={classes.submit}>
 						Change Email
           			</Button>
 
+				</form>
+
+				<form className={classes.form} id='form2' onSubmit={e =>  e.preventDefault() }>
+				<FormControl margin="normal" required fullWidth>
+						<InputLabel htmlFor="tel">Change Phone </InputLabel>
+						<Input id="phone" name="phone" placeholder={phone} autoComplete="off" value={newPhone} onChange={e => setNewPhone(e.target.value)}  />
+					</FormControl>
+
+					<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						disabled={newPhone.length === 0}
+						color="primary"
+						onClick={changePhone}
+						className={classes.submit}>
+						Change Phone
+          			</Button>
 				</form>
 				
 				<Button
@@ -101,9 +125,16 @@ function Dashboard(props: { history?: any; classes?: any }) {
 		</main>
 	)
 	
-	async function onRegister() {
+	async function changeEmail() {
 		try {
 			await firebase.updateUserEmail(newEmail)
+		} catch(error) {
+			alert(error.message)
+		}
+	}
+	async function changePhone() {
+		try {
+			await firebase.updateUserPhone(newPhone)
 		} catch(error) {
 			alert(error.message)
 		}
