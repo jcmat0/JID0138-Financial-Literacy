@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Typography, Paper, Avatar, Button } from '@material-ui/core'
 import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
 import withStyles from '@material-ui/core/styles/withStyles'
 import { Link } from 'react-router-dom'
+import firebase from '../firebase'
 
 const styles = theme => ({
 	main: {
@@ -34,6 +35,13 @@ const styles = theme => ({
 
 function HomePage(props) {
 	const { classes } = props
+	const [loggedIn, setLoggedIn] = useState(false)
+	useEffect(() => {
+		if (firebase.getCurrentUsername()) {
+			window.location.href = '/dashboard'
+			setLoggedIn(true)
+		}
+	})
 
 	return (
 		<main className={classes.main}>
