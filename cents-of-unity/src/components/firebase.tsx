@@ -91,7 +91,7 @@ class Firebase {
 	async getCurrentUserRole() {
 		const role = await this.database.ref(`users/${this.auth.currentUser?.uid}`).once('value').then(function(view) {
 			console.log(view.val())
-			return view.val().role || 'No Phone Number'
+			return view.val().role || 'No Role'
 		})
 		return role
 	}

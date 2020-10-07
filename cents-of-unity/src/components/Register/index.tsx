@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
-import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel, Select, MenuItem } from '@material-ui/core'
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import { Avatar, Button, FormControl, Grid, Input, InputLabel, Paper, Typography } from '@material-ui/core'
 import withStyles from '@material-ui/core/styles/withStyles'
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
+import React, { useState } from 'react'
 import { Link, withRouter } from 'react-router-dom'
+import styled from 'styled-components'
 import firebase from '../firebase'
 const styles = theme => ({
 	main: {
@@ -36,6 +38,11 @@ const styles = theme => ({
 	},
 })
 
+// awful hack, thanks material-ui
+const CenteredGrid = styled(Grid)`
+	align-self: center;
+`;
+
 function Register(props) {
 	const { classes } = props
 
@@ -43,7 +50,7 @@ function Register(props) {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [phone, setPhone] = useState('')
-	const [role, setRole] = useState('')
+	const [role, setRole] = useState('student')
 
 	return (
 		<main className={classes.main}>
@@ -55,34 +62,49 @@ function Register(props) {
 					Register Account
 				</Typography>
 				<form className={classes.form} onSubmit={e =>  e.preventDefault() }>
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="name">Name</InputLabel>
-						<Input id="name" name="name" autoComplete="off" autoFocus value={name} onChange={e => setName(e.target.value)} />
-					</FormControl>
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="email">Email Address</InputLabel>
-						<Input id="email" name="email" autoComplete="off" value={email} onChange={e => setEmail(e.target.value)}  />
-					</FormControl>
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="password">Password</InputLabel>
-						<Input name="password" type="password" id="password" autoComplete="off" value={password} onChange={e => setPassword(e.target.value)}  />
-					</FormControl>
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="phone">Your Phone Number</InputLabel>
-						<Input name="phone" type="tel" id="phone" placeholder="(XXX)-XXX-XXXX" autoComplete="off" value={phone} onChange={e => setPhone(e.target.value)}  />
-					</FormControl>
-				<FormControl className={classes.formControl} required fullWidth>
-					<InputLabel id="demo-simple-select-label">Role</InputLabel>
-					<Select
-						labelId="demo-simple-select-label"
-						id="demo-simple-select"
-						value={role}
-						onChange={e => setRole(e?.target.value as string)}
+					<Grid
+						container
+						direction="column"
+						alignItems="stretch"
 					>
-						<MenuItem value={"student"}>Student</MenuItem>
-						<MenuItem value={"professor"}>Professor</MenuItem>
-					</Select>
-      	</FormControl>
+						<Grid item>
+							<FormControl margin="normal" required fullWidth>
+								<InputLabel htmlFor="name">Name</InputLabel>
+								<Input id="name" name="name" autoComplete="off" autoFocus value={name} onChange={e => setName(e.target.value)} />
+							</FormControl>
+						</Grid>
+						<Grid item>
+							<FormControl margin="normal" required fullWidth>
+								<InputLabel htmlFor="email">Email Address</InputLabel>
+								<Input id="email" name="email" autoComplete="off" value={email} onChange={e => setEmail(e.target.value)}  />
+							</FormControl>
+						</Grid>
+						<Grid item>
+							<FormControl margin="normal" required fullWidth>
+								<InputLabel htmlFor="password">Password</InputLabel>
+								<Input name="password" type="password" id="password" autoComplete="off" value={password} onChange={e => setPassword(e.target.value)}  />
+							</FormControl>
+						</Grid>
+						<Grid item>
+							<FormControl margin="normal" required fullWidth>
+								<InputLabel htmlFor="phone">Your Phone Number</InputLabel>
+								<Input name="phone" type="tel" id="phone" placeholder="(XXX)-XXX-XXXX" autoComplete="off" value={phone} onChange={e => setPhone(e.target.value)}  />
+							</FormControl>
+						</Grid>
+						<CenteredGrid item>
+							<FormControl margin="normal" required fullWidth>
+								<ToggleButtonGroup
+									id="demo-simple-select"
+									value={role}
+									exclusive
+									onChange={(e, newValue) => setRole(newValue as string)}
+								>
+									<ToggleButton value={"student"}>Student</ToggleButton>
+									<ToggleButton value={"professor"}>Professor</ToggleButton>
+								</ToggleButtonGroup>
+							</FormControl>
+						</CenteredGrid>
+					</Grid>
 
 					<Button
 						type="submit"
