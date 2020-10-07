@@ -50,7 +50,7 @@ function Register(props) {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [phone, setPhone] = useState('')
-	const [role, setRole] = useState('')
+	const [role, setRole] = useState('student')
 
 	return (
 		<main className={classes.main}>
