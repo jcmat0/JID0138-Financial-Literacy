@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
-import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel, Grid } from '@material-ui/core'	
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab'
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import { Avatar, Button, FormControl, Grid, Input, InputLabel, Paper, Typography } from '@material-ui/core'
 import withStyles from '@material-ui/core/styles/withStyles'
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
+import React, { useState } from 'react'
 import { Link, withRouter } from 'react-router-dom'
+import styled from 'styled-components'
 import firebase from '../firebase'
 const styles = theme => ({
 	main: {
