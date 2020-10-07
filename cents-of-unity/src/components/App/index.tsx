@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import './styles.css'
+import { CircularProgress, CssBaseline } from '@material-ui/core'
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import Dashboard from '../Dashboard'
+import firebase from '../firebase'
 import HomePage from '../HomePage'
 import Login from '../Login'
 import Register from '../Register'
-import Dashboard from '../Dashboard'
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
-import { CssBaseline, CircularProgress } from '@material-ui/core'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import firebase from '../firebase';
+import './styles.css'
 
 const theme = createMuiTheme()
 

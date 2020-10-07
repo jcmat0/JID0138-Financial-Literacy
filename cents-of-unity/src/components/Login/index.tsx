@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel } from '@material-ui/core'
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import { Avatar, Button, FormControl, Input, InputLabel, Paper, Typography } from '@material-ui/core'
 import withStyles from '@material-ui/core/styles/withStyles'
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import React, { useState } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import firebase from '../firebase'
 

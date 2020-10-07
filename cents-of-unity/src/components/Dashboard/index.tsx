@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
-import { Typography, FormControl, InputLabel, Input, Paper, Avatar, CircularProgress, Button } from '@material-ui/core'
-import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
+import { Avatar, Button, CircularProgress, FormControl, Input, InputLabel, Paper, Typography } from '@material-ui/core'
 import withStyles from '@material-ui/core/styles/withStyles'
-import firebase from '../firebase'
+import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
+import React, { useEffect, useState } from 'react'
 import { withRouter } from 'react-router-dom'
+import firebase from '../firebase'
 
 const styles = theme => ({
 	main: {

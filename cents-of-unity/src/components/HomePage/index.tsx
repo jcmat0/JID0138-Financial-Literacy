@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { Typography, Paper, Avatar, Button } from '@material-ui/core'
-import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
+import { Avatar, Button, Paper, Typography } from '@material-ui/core'
 import withStyles from '@material-ui/core/styles/withStyles'
+import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import firebase from '../firebase'
 
