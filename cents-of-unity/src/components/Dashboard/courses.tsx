@@ -1,5 +1,6 @@
 import React from 'react'
-import { List, ListItem, ListItemText } from '@material-ui/core'
+import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@material-ui/core'
+import { EditRounded, DeleteRounded } from '@material-ui/icons'
 import firebase from '../firebase'
 
 export class CourseList extends React.Component {
@@ -8,19 +9,13 @@ export class CourseList extends React.Component {
 		courses: {}
 	}
 
-	constructor(props) {
-		super(props)
-
-		this.renderCourse = this.renderCourse.bind(this)
-	}
-
 	componentDidMount() {
 		this.getCourseReference()
 	}
 
 	async getCourseReference() {
 		console.log("Setting up course listeners")
-		this.courseRef = await firebase.getCurrentUserCoursesReference()
+		this.courseRef = await firebase.getCurrentUserCoursesRef()
 
 		this.courseRef.on('child_added', this.courseAdded)
 
@@ -31,7 +26,9 @@ export class CourseList extends React.Component {
 
 	courseAdded = async courseData => {
 		const newCourses = {
-			[courseData.key]: await firebase.getCourseByID(courseData.key)
+			[courseData.key]: await firebase.getCourseRefByID(courseData.key).then(reference => {
+				return reference.once('value').then(snapshot => snapshot.val())
+			})
 		}
 
 		Object.assign(newCourses, this.state.courses)
@@ -43,7 +40,9 @@ export class CourseList extends React.Component {
 
 	courseChanged = async courseData => {
 		const newCourses = {
-			[courseData.key]: await firebase.getCourseByID(courseData.key)
+			[courseData.key]: await firebase.getCourseRefByID(courseData.key).then(reference => {
+				return reference.once('value').then(snapshot => snapshot.val())
+			})
 		}
 
 		Object.assign(newCourses, this.state.courses)
@@ -63,7 +62,8 @@ export class CourseList extends React.Component {
 		})
 	}
 
-	renderCourse(course) {
+	renderCourse = entry => {
+		const course = entry[1]
 		console.log("Trying to render course", course)
 
 		const renderOut = (
@@ -72,6 +72,19 @@ export class CourseList extends React.Component {
 					primary={course.name || "Invalid course"}
 					secondary={course.description || "No description"}
 				/>
+				{(course.createdBy === firebase.auth.currentUser?.uid) ?
+					(
+						<ListItemSecondaryAction>
+							<IconButton edge="end">
+								<EditRounded />
+							</IconButton>
+							<IconButton edge="end" color="secondary" onClick={() => this.deleteCourse(entry)}>
+								<DeleteRounded />
+							</IconButton>
+						</ListItemSecondaryAction>
+						)
+					: ""
+				}
 			</ListItem>
 		)
 
@@ -80,10 +93,21 @@ export class CourseList extends React.Component {
 		return renderOut
 	}
 
+	deleteCourse = async entry => {
+		const key = entry[0]
+		const course = entry[1]
+		console.log("Deleting course", key, course)
+		try {
+			await Promise.all([(await firebase.getCourseRefByID(key)).remove(), (await firebase.getCurrentUserMembershipInCourseIDRef(key)).remove()])
+		} catch(error) {
+			console.log(error.message)
+		}
+	}
+
 	render() {
 		console.log("Rendering course list", this.state)
 
-		const courses = Object.values(this.state.courses)
+		const courses = Object.entries(this.state.courses)
 
 		return (
 			<List>

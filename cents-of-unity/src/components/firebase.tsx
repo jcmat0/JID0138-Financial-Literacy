@@ -123,16 +123,20 @@ class Firebase {
 		return this.auth.currentUser?.email || "No Email"
 	}
 
-	async getCurrentUserCourseIDs() {
+	async getCurrentUserCoursesIDs() {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`).once('value').then((snapshot) => Object.keys(snapshot.val()))
 	}
 
-	async getCurrentUserCoursesReference() {
+	async getCurrentUserCoursesRef() {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`)
 	}
 
-	async getCourseByID(id) {
-		return this.database.ref(`courses/${id}`).once('value').then((snapshot) => snapshot.val())
+	async getCurrentUserMembershipInCourseIDRef(id) {
+		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses/${id}`)
+	}
+
+	async getCourseRefByID(id) {
+		return this.database.ref(`courses/${id}`)
 	}
 
 	async updateUserEmail(email: string) {
