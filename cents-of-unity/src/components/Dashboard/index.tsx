@@ -41,6 +41,7 @@ function Dashboard(props: { history?: any; classes?: any }) {
 	const [role, setRole] = useState('')
 	const [newEmail, setNewEmail] = useState('')
 	const [newPhone, setNewPhone] = useState('')
+	const [courseName, setCourseName] = useState('')
 
 	useEffect(() => {
 		if (firebase.getCurrentUsername()) {
@@ -95,7 +96,7 @@ function Dashboard(props: { history?: any; classes?: any }) {
 				</form>
 
 				<form className={classes.form} id='form2' onSubmit={e =>  e.preventDefault() }>
-				<FormControl margin="normal" required fullWidth>
+					<FormControl margin="normal" required fullWidth>
 						<InputLabel htmlFor="tel">Change Phone </InputLabel>
 						<Input id="phone" name="phone" placeholder={phone} autoComplete="off" value={newPhone} onChange={e => setNewPhone(e.target.value)}  />
 					</FormControl>
@@ -110,6 +111,24 @@ function Dashboard(props: { history?: any; classes?: any }) {
 						className={classes.submit}>
 						Change Phone
           			</Button>
+				</form>
+
+				<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
+					<FormControl margin="normal" required fullWidth>
+						<InputLabel htmlFor="course">Course Name</InputLabel>
+						<Input id="course" name="course" autoComplete="off" value={courseName} onChange={e => setCourseName(e.target.value)}  />
+					</FormControl>
+
+					<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						disabled={courseName.length === 0}
+						color="primary"
+						onClick={createCourse}
+						className={classes.submit}>
+						Create New Course
+					</Button>
 				</form>
 				
 				<Button
@@ -135,6 +154,14 @@ function Dashboard(props: { history?: any; classes?: any }) {
 	async function changePhone() {
 		try {
 			await firebase.updateUserPhone(newPhone)
+		} catch(error) {
+			alert(error.message)
+		}
+	}
+
+	async function createCourse() {
+		try {
+			await firebase.createCourse(courseName)
 		} catch(error) {
 			alert(error.message)
 		}

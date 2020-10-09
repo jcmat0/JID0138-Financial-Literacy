@@ -2,6 +2,7 @@ import app from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firebase-firestore'
 import 'firebase/firebase-database'
+import { v4 as uuidv4 } from 'uuid'
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const config = {
@@ -70,6 +71,23 @@ class Firebase {
 		})
 	}
 
+	async createCourse(name) {
+		if (!this.auth.currentUser || (await this.getCurrentUserRole() !== "professor")) {
+			return alert('Not authorized')
+		}
+
+		const newCourseID = uuidv4()
+
+		const coursesPromise = this.database.ref('courses/' + newCourseID).update({
+			"name": name
+		})
+		const usersPromise = this.database.ref('users/' + this.auth.currentUser?.uid +'/courses').update({
+			[newCourseID]: true
+		})
+
+		return Promise.all([coursesPromise, usersPromise])
+	}
+
 	isInitialized() {
 		return new Promise(resolve => {
 			this.auth.onAuthStateChanged(resolve)
@@ -98,6 +116,10 @@ class Firebase {
 
 	async getCurrentUserEmail() {
 		return this.auth.currentUser?.email || "No Email"
+	}
+
+	async getCourse(id) {
+		return await this.database.ref(`courses/${id}`).once('value')
 	}
 
 	async updateUserEmail(email: string) {
