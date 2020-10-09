@@ -79,6 +79,7 @@ class Firebase {
 		const newCourseID = uuidv4()
 
 		const coursesPromise = this.database.ref('courses/' + newCourseID).update({
+			"createdBy": this.auth.currentUser?.uid,
 			"name": name
 		})
 		const usersPromise = this.database.ref('users/' + this.auth.currentUser?.uid +'/courses').update({
@@ -94,22 +95,26 @@ class Firebase {
 		})
 	}
 
+	isAuthenticated() {
+		return this.auth.currentUser
+	}
+
 	getCurrentUsername() {
 		return this.auth.currentUser && this.auth.currentUser.displayName
 	}
 
 	async getCurrentUserPhone() {
-		const phone = await this.database.ref(`users/${this.auth.currentUser?.uid}`).once('value').then(function(view) {
+		const phone = await this.database.ref(`users/${this.auth.currentUser?.uid}/phone`).once('value').then(function(view) {
 			console.log(view.val())
-			return view.val().phone || 'No Phone Number'
+			return view.val() || 'No Phone Number'
 		})
 		return phone
 	}
 
 	async getCurrentUserRole() {
-		const role = await this.database.ref(`users/${this.auth.currentUser?.uid}`).once('value').then(function(view) {
+		const role = await this.database.ref(`users/${this.auth.currentUser?.uid}/role`).once('value').then(function(view) {
 			console.log(view.val())
-			return view.val().role || 'No Role'
+			return view.val() || 'No Role'
 		})
 		return role
 	}
@@ -118,8 +123,16 @@ class Firebase {
 		return this.auth.currentUser?.email || "No Email"
 	}
 
-	async getCourse(id) {
-		return await this.database.ref(`courses/${id}`).once('value')
+	async getCurrentUserCourseIDs() {
+		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`).once('value').then((snapshot) => Object.keys(snapshot.val()))
+	}
+
+	async getCurrentUserCoursesReference() {
+		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`)
+	}
+
+	async getCourseByID(id) {
+		return this.database.ref(`courses/${id}`).once('value').then((snapshot) => snapshot.val())
 	}
 
 	async updateUserEmail(email: string) {

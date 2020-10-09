@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Typography, FormControl, InputLabel, Input, Paper, Avatar, CircularProgress, Button } from '@material-ui/core'
+import { Typography, Divider, FormControl, InputLabel, Input, Paper, Avatar, CircularProgress, Button } from '@material-ui/core'
 import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
 import withStyles from '@material-ui/core/styles/withStyles'
 import firebase from '../firebase'
+import { CourseList } from './courses'
 import { withRouter } from 'react-router-dom'
 
 const styles = theme => ({
@@ -64,16 +65,16 @@ function Dashboard(props: { history?: any; classes?: any }) {
 				<Avatar className={classes.avatar}>
 					<VerifiedUserOutlined />
 				</Avatar>
-				<Typography component="h1" variant="h5">
+				<Typography component="h1" variant="h4">
 					Hello { firebase.getCurrentUsername() }
 				</Typography>
-				<Typography component="h1" variant="h5">
+				<Typography component="h2" variant="h5">
 					Your phone: {phone ? `${phone}` : <CircularProgress size={20} />}
 				</Typography>
-				<Typography component="h1" variant="h5">
+				<Typography component="h2" variant="h5">
 					Your email: {email ? `${email}` : <CircularProgress size={20} />}
 				</Typography>
-				<Typography component="h1" variant="h5">
+				<Typography component="h2" variant="h5">
 					Your role: {role ? `${role}` : <CircularProgress size={20} />}
 				</Typography>
 				<form className={classes.form} onSubmit={e =>  e.preventDefault() }>
@@ -112,6 +113,15 @@ function Dashboard(props: { history?: any; classes?: any }) {
 						Change Phone
           			</Button>
 				</form>
+
+				<Divider />
+
+				<Typography component="h2" variant="h4">
+					Your Courses
+				</Typography>
+
+				<CourseList />
+
 
 				<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
 					<FormControl margin="normal" required fullWidth>
@@ -162,6 +172,7 @@ function Dashboard(props: { history?: any; classes?: any }) {
 	async function createCourse() {
 		try {
 			await firebase.createCourse(courseName)
+			setCourseName('')
 		} catch(error) {
 			alert(error.message)
 		}
