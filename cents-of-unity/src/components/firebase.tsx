@@ -2,6 +2,7 @@ import app from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firebase-firestore'
 import 'firebase/firebase-database'
+import { v4 as uuidv4 } from 'uuid'
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const config = {
@@ -70,10 +71,32 @@ class Firebase {
 		})
 	}
 
+	async createCourse(name) {
+		if (!this.auth.currentUser || (await this.getCurrentUserRole() !== "professor")) {
+			return alert('Not authorized')
+		}
+
+		const newCourseID = uuidv4()
+
+		const coursesPromise = this.database.ref('courses/' + newCourseID).update({
+			"createdBy": this.auth.currentUser?.uid,
+			"name": name
+		})
+		const usersPromise = this.database.ref('users/' + this.auth.currentUser?.uid +'/courses').update({
+			[newCourseID]: true
+		})
+
+		return Promise.all([coursesPromise, usersPromise])
+	}
+
 	isInitialized() {
 		return new Promise(resolve => {
 			this.auth.onAuthStateChanged(resolve)
 		})
+	}
+
+	isAuthenticated() {
+		return this.auth.currentUser
 	}
 
 	getCurrentUsername() {
@@ -81,23 +104,39 @@ class Firebase {
 	}
 
 	async getCurrentUserPhone() {
-		const phone = await this.database.ref(`users/${this.auth.currentUser?.uid}`).once('value').then(function(view) {
+		const phone = await this.database.ref(`users/${this.auth.currentUser?.uid}/phone`).once('value').then(function(view) {
 			console.log(view.val())
-			return view.val().phone || 'No Phone Number'
+			return view.val() || 'No Phone Number'
 		})
 		return phone
 	}
 
 	async getCurrentUserRole() {
-		const role = await this.database.ref(`users/${this.auth.currentUser?.uid}`).once('value').then(function(view) {
+		const role = await this.database.ref(`users/${this.auth.currentUser?.uid}/role`).once('value').then(function(view) {
 			console.log(view.val())
-			return view.val().role || 'No Role'
+			return view.val() || 'No Role'
 		})
 		return role
 	}
 
 	async getCurrentUserEmail() {
 		return this.auth.currentUser?.email || "No Email"
+	}
+
+	async getCurrentUserCoursesIDs() {
+		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`).once('value').then((snapshot) => Object.keys(snapshot.val()))
+	}
+
+	async getCurrentUserCoursesRef() {
+		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`)
+	}
+
+	async getCurrentUserMembershipInCourseIDRef(id) {
+		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses/${id}`)
+	}
+
+	async getCourseRefByID(id) {
+		return this.database.ref(`courses/${id}`)
 	}
 
 	async updateUserEmail(email: string) {

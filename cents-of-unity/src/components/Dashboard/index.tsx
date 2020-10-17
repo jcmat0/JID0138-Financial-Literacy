@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Typography, FormControl, InputLabel, Input, Paper, Avatar, CircularProgress, Button } from '@material-ui/core'
+import { Typography, Divider, FormControl, InputLabel, Input, Paper, Avatar, CircularProgress, Button } from '@material-ui/core'
 import VerifiedUserOutlined from '@material-ui/icons/VerifiedUserOutlined'
 import withStyles from '@material-ui/core/styles/withStyles'
 import firebase from '../firebase'
+import { CourseList } from './courses'
 import { withRouter } from 'react-router-dom'
 
 const styles = theme => ({
@@ -41,6 +42,7 @@ function Dashboard(props: { history?: any; classes?: any }) {
 	const [role, setRole] = useState('')
 	const [newEmail, setNewEmail] = useState('')
 	const [newPhone, setNewPhone] = useState('')
+	const [courseName, setCourseName] = useState('')
 
 	useEffect(() => {
 		if (firebase.getCurrentUsername()) {
@@ -63,16 +65,16 @@ function Dashboard(props: { history?: any; classes?: any }) {
 				<Avatar className={classes.avatar}>
 					<VerifiedUserOutlined />
 				</Avatar>
-				<Typography component="h1" variant="h5">
+				<Typography component="h1" variant="h4">
 					Hello { firebase.getCurrentUsername() }
 				</Typography>
-				<Typography component="h1" variant="h5">
+				<Typography component="h2" variant="h5">
 					Your phone: {phone ? `${phone}` : <CircularProgress size={20} />}
 				</Typography>
-				<Typography component="h1" variant="h5">
+				<Typography component="h2" variant="h5">
 					Your email: {email ? `${email}` : <CircularProgress size={20} />}
 				</Typography>
-				<Typography component="h1" variant="h5">
+				<Typography component="h2" variant="h5">
 					Your role: {role ? `${role}` : <CircularProgress size={20} />}
 				</Typography>
 				<form className={classes.form} onSubmit={e =>  e.preventDefault() }>
@@ -95,7 +97,7 @@ function Dashboard(props: { history?: any; classes?: any }) {
 				</form>
 
 				<form className={classes.form} id='form2' onSubmit={e =>  e.preventDefault() }>
-				<FormControl margin="normal" required fullWidth>
+					<FormControl margin="normal" required fullWidth>
 						<InputLabel htmlFor="tel">Change Phone </InputLabel>
 						<Input id="phone" name="phone" placeholder={phone} autoComplete="off" value={newPhone} onChange={e => setNewPhone(e.target.value)}  />
 					</FormControl>
@@ -110,6 +112,33 @@ function Dashboard(props: { history?: any; classes?: any }) {
 						className={classes.submit}>
 						Change Phone
           			</Button>
+				</form>
+
+				<Divider />
+
+				<Typography component="h2" variant="h4">
+					Your Courses
+				</Typography>
+
+				<CourseList />
+
+
+				<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
+					<FormControl margin="normal" required fullWidth>
+						<InputLabel htmlFor="course">Course Name</InputLabel>
+						<Input id="course" name="course" autoComplete="off" value={courseName} onChange={e => setCourseName(e.target.value)}  />
+					</FormControl>
+
+					<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						disabled={courseName.length === 0}
+						color="primary"
+						onClick={createCourse}
+						className={classes.submit}>
+						Create New Course
+					</Button>
 				</form>
 				
 				<Button
@@ -135,6 +164,15 @@ function Dashboard(props: { history?: any; classes?: any }) {
 	async function changePhone() {
 		try {
 			await firebase.updateUserPhone(newPhone)
+		} catch(error) {
+			alert(error.message)
+		}
+	}
+
+	async function createCourse() {
+		try {
+			await firebase.createCourse(courseName)
+			setCourseName('')
 		} catch(error) {
 			alert(error.message)
 		}
