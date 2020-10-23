@@ -8,6 +8,7 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import { CssBaseline, CircularProgress } from '@material-ui/core'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import firebase from '../firebase';
+import CourseDashboard from '../CourseDashboard'
 
 const theme = createMuiTheme()
 
@@ -32,6 +33,7 @@ export default function App() {
 					<Route exact path="/login" component={Login} />
 					<Route exact path="/register" component={Register} />
 					<Route exact path="/dashboard" component={Dashboard} />
+					<Route path="/courseDashboard/:uid" render={(props) => <CourseDashboard {...props}/>}/>
 				</Switch>
 			</Router>
 		</MuiThemeProvider>

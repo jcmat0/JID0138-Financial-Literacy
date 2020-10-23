@@ -1,7 +1,15 @@
-import React from 'react'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect } from 'react'
 import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@material-ui/core'
 import { EditRounded, DeleteRounded } from '@material-ui/icons'
 import firebase from '../firebase'
+import CourseDashboard from '../CourseDashboard'
+
+export type Course = {
+	createdBy: string
+	name: string
+	modules: Array<any>
+}
 
 export class CourseList extends React.Component {
 	private courseRef : any
@@ -71,6 +79,7 @@ export class CourseList extends React.Component {
 				<ListItemText
 					primary={course.name || "Invalid course"}
 					secondary={course.description || "No description"}
+					onClick={() => window.location.href = '/courseDashboard/' + entry[0]}
 				/>
 				{(course.createdBy === firebase.auth.currentUser?.uid) ?
 					(
