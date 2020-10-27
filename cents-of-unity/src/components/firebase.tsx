@@ -157,12 +157,20 @@ class Firebase {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`)
 	}
 
+	async getCourseModules(cid) {
+		return this.database.ref(`courses/${cid}/modules`)
+	}
+
 	async getCurrentUserMembershipInCourseIDRef(id) {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses/${id}`)
 	}
 
 	async getCourseRefByID(id) {
 		return this.database.ref(`courses/${id}`)
+	}
+
+	async getModuleRefByID(id) {
+		return this.database.ref(`modules/${id}`)
 	}
 
 	async updateUserEmail(email: string) {

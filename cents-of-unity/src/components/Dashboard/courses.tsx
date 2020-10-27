@@ -24,7 +24,7 @@ export class CourseList extends React.Component {
 	async getCourseReference() {
 		console.log("Setting up course listeners")
 		this.courseRef = await firebase.getCurrentUserCoursesRef()
-
+		console.log('course_ref', this.courseRef)
 		this.courseRef.on('child_added', this.courseAdded)
 
 		this.courseRef.on('child_changed', this.courseChanged)
@@ -33,14 +33,15 @@ export class CourseList extends React.Component {
 	}
 
 	courseAdded = async courseData => {
+		console.log("courseData", courseData)
 		const newCourses = {
 			[courseData.key]: await firebase.getCourseRefByID(courseData.key).then(reference => {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
-
+		console.log("before", newCourses)
 		Object.assign(newCourses, this.state.courses)
-
+		console.log("after", newCourses)
 		this.setState({
 			courses: newCourses
 		})
@@ -52,9 +53,6 @@ export class CourseList extends React.Component {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
-
-		Object.assign(newCourses, this.state.courses)
-
 		this.setState({
 			courses: newCourses
 		})

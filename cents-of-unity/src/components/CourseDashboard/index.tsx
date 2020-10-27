@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom'
 import { Paper, Typography, Divider, FormControl, Input, InputLabel, Button } from '@material-ui/core'
 import firebase from '../firebase'
 import { Course } from '../Dashboard/courses'
+import { ModuleList } from './modules'
 
 const styles = theme => ({
 	main: {
@@ -55,7 +56,7 @@ function CourseDashboard(props) {
 				<Typography component="h1" variant="h5">
 						Modules
 				</Typography>
-				{/* <ModuleList /> */}
+				<ModuleList courseID={uid}/>
 				<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
 					<FormControl margin="normal" required fullWidth>
 						<InputLabel htmlFor="course">Module Name</InputLabel>
