@@ -12,28 +12,29 @@ export class ModuleList extends React.Component<propType> {
 		modules: {}
 	}
 	componentDidMount() {
-		this.getCourseReference()
+		this.getModuleReference()
 	}
 
-	async getCourseReference() {
+	async getModuleReference() {
 		const {courseID} = this.props
-		console.log("Setting up course listeners")
+		console.log("Setting up modules listeners")
 		this.moduleRef = await firebase.getCourseModules(courseID)
 		console.log("refs?", this.moduleRef)
-		this.moduleRef.on('child_added', this.courseAdded)
+		this.moduleRef.on('child_added', this.moduleAdded)
 
-		this.moduleRef.on('child_changed', this.courseChanged)
+		this.moduleRef.on('child_changed', this.moduleChanged)
 
-		this.moduleRef.on('child_removed', this.courseRemoved)
+		this.moduleRef.on('child_removed', this.moduleRemoved)
 	}
 
-	courseAdded = async courseData => {
+	moduleAdded = async courseData => {
 
 		const newModules = {
 			[courseData.key]: await firebase.getModuleRefByID(courseData.key).then(reference => {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
+
 		Object.assign(newModules, this.state.modules)
 
 		this.setState({
@@ -41,21 +42,21 @@ export class ModuleList extends React.Component<propType> {
 		})
 	}
 
-	courseChanged = async courseData => {
-		const newCourses = {
+	moduleChanged = async courseData => {
+		const newModules = {
 			[courseData.key]: await firebase.getModuleRefByID(courseData.key).then(reference => {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
 
-		Object.assign(newCourses, this.state.modules)
+		Object.assign(newModules, this.state.modules)
 
 		this.setState({
-			modules: newCourses
+			modules: newModules
 		})
 	}
 
-	courseRemoved = async courseData => {
+	moduleRemoved = async courseData => {
 		const newModules = Object.assign({}, this.state.modules)
 
 		delete newModules[courseData.key]
@@ -65,60 +66,58 @@ export class ModuleList extends React.Component<propType> {
 		})
 	}
 
-	renderCourse = entry => {
-		const moduleID = entry[0]
-		console.log("Trying to render module", entry)
-		const module = firebase.getModuleRefByID(moduleID)
-		console.log("did it work?", module)
-		// const renderOut = (
-		// 	<ListItem key={course.name} button>
-		// 		<ListItemText
-		// 			primary={course.name || "Invalid course"}
-		// 			secondary={course.description || "No description"}
-		// 		/>
-		// 		{(course.createdBy === firebase.auth.currentUser?.uid) ?
-		// 			(
-		// 				<ListItemSecondaryAction>
-		// 					<IconButton edge="end">
-		// 						<EditRounded />
-		// 					</IconButton>
-		// 					<IconButton edge="end" color="secondary" onClick={() => this.deleteCourse(entry)}>
-		// 						<DeleteRounded />
-		// 					</IconButton>
-		// 				</ListItemSecondaryAction>
-		// 				)
-		// 			: ""
-		// 		}
-		// 	</ListItem>
-		// )
+	renderModule = entry => {
+		const module = entry[1]
+		const renderOut = (
+			<ListItem key={module.name} button>
+				<ListItemText
+					primary={module.name || "Invalid module"}
+					// secondary={module.description || "No description"}
+				/>
+				{(module.createdBy === firebase.auth.currentUser?.uid) ?
+					(
+						<ListItemSecondaryAction>
+							<IconButton edge="end">
+								<EditRounded />
+							</IconButton>
+							<IconButton edge="end" color="secondary" onClick={() => this.deleteModule(entry)}>
+								<DeleteRounded />
+							</IconButton>
+						</ListItemSecondaryAction>
+						)
+					: ""
+				}
+			</ListItem>
+		)
 
-		// console.log(renderOut)
+		console.log(renderOut)
 
-		return {}
+		return renderOut
 	}
 
-	deleteCourse = async entry => {
+	deleteModule = async entry => {
 		const key = entry[0]
 		const course = entry[1]
-		console.log("Deleting course", key, course)
+		const {courseID} = this.props
+		console.log("Deleting module", key, course)
 		try {
-			await Promise.all([(await firebase.getCourseRefByID(key)).remove(), (await firebase.getCurrentUserMembershipInCourseIDRef(key)).remove()])
+			await Promise.all([(await firebase.getModuleRefByID(key)).remove(), (await firebase.getModuleExistenceInCourseIDRef(courseID,key)).remove()])
 		} catch(error) {
 			console.log(error.message)
 		}
 	}
 
 	render() {
-		console.log("Rendering course list", this.state)
+		console.log("Rendering module list", this.state)
 
 		const modules = Object.entries(this.state.modules)
 
 		return (
 			<List>
-				{modules.length > 0 ? modules.map(this.renderCourse) : (
-					<ListItem key="noCourses">
+				{modules.length > 0 ? modules.map(this.renderModule) : (
+					<ListItem key="noModules">
 						<ListItemText
-							secondary="No courses available"
+							secondary="No modules available"
 						/>
 					</ListItem>
 				)}

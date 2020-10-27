@@ -165,6 +165,10 @@ class Firebase {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses/${id}`)
 	}
 
+	async getModuleExistenceInCourseIDRef(courseID, moduleID) {
+		return this.database.ref(`courses/${courseID}/modules/${moduleID}`)
+	}
+
 	async getCourseRefByID(id) {
 		return this.database.ref(`courses/${id}`)
 	}
