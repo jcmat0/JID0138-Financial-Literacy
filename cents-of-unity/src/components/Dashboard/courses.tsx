@@ -1,19 +1,37 @@
 import React from 'react'
-import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton } from '@material-ui/core'
-import { EditRounded, DeleteRounded } from '@material-ui/icons'
+import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Collapse, FormControl, TextField } from '@material-ui/core'
+import { EditRounded, DeleteRounded, ExpandLessRounded, CheckRounded } from '@material-ui/icons'
 import firebase from '../firebase'
 
+interface Course {
+	name: string,
+	description?: string,
+	createdBy: string,
+}
+
+interface CourseDataProp {
+	courseID: string,
+	course: Course,
+}
+
 export class CourseList extends React.Component {
+	public props : any
 	private courseRef : any
+	private className : any
 	state = {
-		courses: {}
+		courses: {},
+	}
+
+	constructor(props) {
+		super(props)
+		this.className = props.className
 	}
 
 	componentDidMount() {
-		this.getCourseReference()
+		this.getCoursesReference()
 	}
 
-	async getCourseReference() {
+	async getCoursesReference() {
 		console.log("Setting up course listeners")
 		this.courseRef = await firebase.getCurrentUserCoursesRef()
 
@@ -62,55 +80,22 @@ export class CourseList extends React.Component {
 		})
 	}
 
-	renderCourse = entry => {
-		const course = entry[1]
-		console.log("Trying to render course", course)
+	renderCourse = data => {
 
-		const renderOut = (
-			<ListItem key={course.name} button>
-				<ListItemText
-					primary={course.name || "Invalid course"}
-					secondary={course.description || "No description"}
-				/>
-				{(course.createdBy === firebase.auth.currentUser?.uid) ?
-					(
-						<ListItemSecondaryAction>
-							<IconButton edge="end">
-								<EditRounded />
-							</IconButton>
-							<IconButton edge="end" color="secondary" onClick={() => this.deleteCourse(entry)}>
-								<DeleteRounded />
-							</IconButton>
-						</ListItemSecondaryAction>
-						)
-					: ""
-				}
-			</ListItem>
+		var renderOut = (
+			<CourseListItem key={data[0]} courseID={data[0]} course={data[1]} />
 		)
-
-		console.log(renderOut)
 
 		return renderOut
 	}
 
-	deleteCourse = async entry => {
-		const key = entry[0]
-		const course = entry[1]
-		console.log("Deleting course", key, course)
-		try {
-			await Promise.all([(await firebase.getCourseRefByID(key)).remove(), (await firebase.getCurrentUserMembershipInCourseIDRef(key)).remove()])
-		} catch(error) {
-			console.log(error.message)
-		}
-	}
-
 	render() {
-		console.log("Rendering course list", this.state)
-
 		const courses = Object.entries(this.state.courses)
 
+		console.log("Updating courses, new course list:", courses)
+
 		return (
-			<List>
+			<List className={this.className}>
 				{courses.length > 0 ? courses.map(this.renderCourse) : (
 					<ListItem key="noCourses">
 						<ListItemText
@@ -119,6 +104,181 @@ export class CourseList extends React.Component {
 					</ListItem>
 				)}
 			</List>
+		)
+	}
+}
+
+const courseKeys = {"name": true, "description": true, "createdBy": true}
+
+class CourseListItem extends React.Component<CourseDataProp> {
+	public courseID : string
+	public state : any
+
+	private courseRef : any
+
+	constructor(props) {
+		super(props)
+		this.courseID = props.courseID
+		this.state = {
+			open: false,
+			name: props.course.name,
+			nameInput: props.course.name,
+			description: props.course.description,
+			descriptionInput: props.course.description,
+			createdBy: props.course.createdBy,
+		}
+
+		this.getCourseReference()
+	}
+
+	async getCourseReference() {
+		console.log("Setting up course listeners")
+		this.courseRef = await firebase.getCourseRefByID(this.courseID)
+
+		this.courseRef.on('child_added', this.propertyAdded)
+
+		this.courseRef.on('child_changed', this.propertyChanged)
+
+		this.courseRef.on('child_removed', this.propertyRemoved)
+	}
+
+	propertyAdded = propertyData => {
+		console.log(propertyData.key, courseKeys, propertyData.key in courseKeys)
+		if (propertyData.key in courseKeys) {
+			this.setState({
+				[propertyData.key]: propertyData.val()
+			})
+		}
+	}
+
+	propertyChanged = propertyData => {
+		console.log(propertyData.key, courseKeys, propertyData.key in courseKeys)
+		if (propertyData.key in courseKeys) {
+			this.setState({
+				[propertyData.key]: propertyData.val()
+			})
+		}
+	}
+
+	propertyRemoved = propertyData => {
+		console.log(propertyData.key, courseKeys, propertyData.key in courseKeys)
+		if (propertyData.key in courseKeys) {
+			this.setState({
+				[propertyData.key]: propertyData.val()
+			})
+		}
+	}
+
+	expand = () => {
+		this.setState({open: !this.state.open})
+	}
+
+	deleteCourse = async () => {
+		console.log("Deleting course", this.courseID)
+		try {
+			await Promise.all([(await firebase.getCourseRefByID(this.courseID)).remove(), (await firebase.getCurrentUserMembershipInCourseIDRef(this.courseID)).remove()])
+		} catch(error) {
+			console.log(error.message)
+		}
+	}
+
+	handleCourseName = event => {
+		this.setState({nameInput: event.target.value})
+	}
+
+	handleCourseDescription = event => {
+		this.setState({descriptionInput: event.target.value})
+	}
+
+	submitCourseName = async event => {
+		event.preventDefault()
+		await (await firebase.getCourseRefByID(this.courseID)).update({
+			name: this.state.nameInput
+		})
+	}
+
+	submitCourseDescription = async event => {
+		event.preventDefault()
+		await (await firebase.getCourseRefByID(this.courseID)).update({
+			description: this.state.descriptionInput
+		})
+	}
+
+	getInnerControls = () => {
+		if (this.state.createdBy === firebase.auth.currentUser?.uid) {
+			return (
+				<ListItemSecondaryAction>
+					<IconButton edge="end" color="secondary" onClick={() => this.deleteCourse()}>
+						<DeleteRounded />
+					</IconButton>
+					<IconButton edge="end" onClick={() => this.expand()}>
+						{this.state.open ? <ExpandLessRounded /> : <EditRounded />}
+					</IconButton>
+				</ListItemSecondaryAction>
+			)
+		} else {
+			return ""
+		}
+	}
+
+	getOuterControls = () => {
+		return (
+			<Collapse in={this.state.open} timeout="auto" unmountOnExit>
+					<List disablePadding dense>
+						<ListItem key={this.courseID + "_name_control"} dense>
+							<form onSubmit={this.submitCourseName}>
+								<TextField
+									required
+									id={this.courseID+"_name"}
+									defaultValue={this.state.nameInput}
+									onChange={this.handleCourseName}
+									label="Edit Course Name"
+									variant="filled"
+									autoComplete="off"
+								/>
+								<ListItemSecondaryAction>
+									<IconButton type="submit" edge="end" disabled={this.state.nameInput === ""}>
+										<CheckRounded />
+									</IconButton>
+								</ListItemSecondaryAction>
+							</form>
+						</ListItem>
+						<ListItem key={this.courseID + "_description"} dense>
+							<form onSubmit={this.submitCourseDescription}>
+								<TextField
+									required
+									id={this.courseID+"_description"}
+									defaultValue={this.state.descriptionInput}
+									onChange={this.handleCourseDescription}
+									label="Edit Course Description"
+									variant="filled"
+									autoComplete="off"
+									multiline
+								/>
+								<ListItemSecondaryAction>
+									<IconButton type="submit" edge="end">
+										<CheckRounded />
+									</IconButton>
+								</ListItemSecondaryAction>
+							</form>
+						</ListItem>
+					</List>
+			</Collapse>
+		)
+	}
+
+	render() {
+		return (
+			<>
+				<ListItem key={this.courseID} button>
+					<ListItemText
+						primary={this.state.name || "Invalid course"}
+						secondary={this.state.description || "No description"}
+					/>
+					{this.getInnerControls()}
+				</ListItem>
+				{this.getOuterControls()}
+			</>
 		)
 	}
 }
