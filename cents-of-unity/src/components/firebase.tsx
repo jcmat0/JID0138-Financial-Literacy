@@ -89,7 +89,7 @@ class Firebase {
 		return Promise.all([coursesPromise, usersPromise])
 	}
 
-	async createModule(name, uid) {
+	async createModule(name, uid, moduleType) {
 		if (!this.auth.currentUser || (await this.getCurrentUserRole() !== "professor")) {
 			return alert('Not authorized')
 		}
@@ -99,7 +99,8 @@ class Firebase {
 		const modulesPromise = this.database.ref('modules/' + newModuleID).update({
 			"createdBy": this.auth.currentUser?.uid,
 			"courseID": uid,
-			"name": name
+			"name": name,
+			"type": moduleType
 		})
 		const usersPromise = this.database.ref('users/' + this.auth.currentUser?.uid +'/modules').update({
 			[newModuleID]: true

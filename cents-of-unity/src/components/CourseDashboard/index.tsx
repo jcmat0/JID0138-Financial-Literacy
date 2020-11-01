@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import withStyles from '@material-ui/core/styles/withStyles'
 import { withRouter } from 'react-router-dom'
 import { Paper, Typography, Divider, FormControl, Input, InputLabel, Button } from '@material-ui/core'
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import firebase from '../firebase'
 import { Course } from '../Dashboard/courses'
 import { ModuleList } from './modules'
@@ -38,13 +39,13 @@ const styles = theme => ({
 function CourseDashboard(props) {
 	const [course, setCourse] = useState({} as Course)
 	const [moduleName, setModuleName] = useState('')
+	const [moduleType, setModuleType] = useState('lecture')
 	const { classes } = props
 	const { uid } = props.match.params
 	
 	useEffect(() => {
 		firebase.getCourseData(uid).then(setCourse)
 	}, [])
-	
 	
   return (
 		<main className={classes.main}>
@@ -61,6 +62,15 @@ function CourseDashboard(props) {
 					<FormControl margin="normal" required fullWidth>
 						<InputLabel htmlFor="course">Module Name</InputLabel>
 						<Input id="course" name="course" autoComplete="off" value={moduleName} onChange={e => setModuleName(e.target.value)}  />
+						<ToggleButtonGroup
+									id="demo-simple-select"
+									value={moduleType}
+									exclusive
+									onChange={(e, newValue) => setModuleType(newValue as string)}
+						>
+							<ToggleButton value={"lecture"}>Lecture</ToggleButton>
+							<ToggleButton value={"simulation"}>Simulation</ToggleButton>
+						</ToggleButtonGroup>
 					</FormControl>
 
 					<Button
@@ -79,8 +89,9 @@ function CourseDashboard(props) {
 	)
 	async function createModule() {
 		try {
-			await firebase.createModule(moduleName, uid)
+			await firebase.createModule(moduleName, uid, moduleType)
 			setModuleName('')
+			setModuleType('')
 		} catch(error) {
 			alert(error.message)
 		}

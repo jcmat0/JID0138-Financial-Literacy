@@ -1,5 +1,5 @@
 import React from 'react'
-import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Collapse, FormControl, TextField } from '@material-ui/core'
+import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Collapse, FormControl, TextField, Button } from '@material-ui/core'
 import { EditRounded, DeleteRounded, ExpandLessRounded, CheckRounded } from '@material-ui/icons'
 import firebase from '../firebase'
 import CourseDashboard from '../CourseDashboard'
@@ -82,7 +82,7 @@ export class CourseList extends React.Component {
 	renderCourse = data => {
 
 		var renderOut = (
-			<CourseListItem key={data[0]} courseID={data[0]} course={data[1]} />
+			<CourseListItem key={data[0]} courseID={data[0]} course={data[1]}/>
 		)
 
 		return renderOut
@@ -207,6 +207,9 @@ class CourseListItem extends React.Component<CourseDataProp> {
 		if (this.state.createdBy === firebase.auth.currentUser?.uid) {
 			return (
 				<ListItemSecondaryAction>
+					<IconButton edge="end" onClick={() => window.location.href = '/courseDashboard/' + this.courseID}>
+					<Button> Edit Modules </Button>
+					</IconButton>
 					<IconButton edge="end" color="secondary" onClick={() => this.deleteCourse()}>
 						<DeleteRounded />
 					</IconButton>
