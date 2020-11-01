@@ -27,10 +27,10 @@ export class ModuleList extends React.Component<propType> {
 		this.moduleRef.on('child_removed', this.moduleRemoved)
 	}
 
-	moduleAdded = async courseData => {
+	moduleAdded = async moduleData => {
 		console.log("MODULE ADDED CALLED")
 		const newModules = {
-			[courseData.key]: await firebase.getModuleRefByID(courseData.key).then(reference => {
+			[moduleData.key]: await firebase.getModuleRefByID(moduleData.key).then(reference => {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
@@ -42,10 +42,10 @@ export class ModuleList extends React.Component<propType> {
 		})
 	}
 
-	moduleChanged = async courseData => {
+	moduleChanged = async moduleData => {
 		console.log("MODULE CHANGED CALLED")
 		const newModules = {
-			[courseData.key]: await firebase.getModuleRefByID(courseData.key).then(reference => {
+			[moduleData.key]: await firebase.getModuleRefByID(moduleData.key).then(reference => {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
@@ -57,53 +57,25 @@ export class ModuleList extends React.Component<propType> {
 		})
 	}
 
-	moduleRemoved = async courseData => {
+	moduleRemoved = async moduleData => {
 		console.log("MODULE REMOVED CALLED")
 		const newModules = Object.assign({}, this.state.modules)
 
-		delete newModules[courseData.key]
+		delete newModules[moduleData.key]
 
 		this.setState({
 			modules: newModules
 		})
 	}
 
-	// renderModule = entry => {
-		// const module = entry[1]
-		// const renderOut = (
-		// 	<ListItem key={module.name} button>
-		// 		<ListItemText
-		// 			primary={module.name || "Invalid module"}
-		// 			secondary={module.type || "No description"}
-		// 		/>
-		// 		{(module.createdBy === firebase.auth.currentUser?.uid) ?
-		// 			(
-		// 				<ListItemSecondaryAction>
-		// 					<IconButton edge="end">
-		// 						<EditRounded />
-		// 					</IconButton>
-		// 					<IconButton edge="end" color="secondary" onClick={() => this.deleteModule(entry)}>
-		// 						<DeleteRounded />
-		// 					</IconButton>
-		// 				</ListItemSecondaryAction>
-		// 				)
-		// 			: ""
-		// 		}
-		// 	</ListItem>
-		// )
+	renderModule = data => {
 
-		// console.log(renderOut)
+		var renderOut = (
+			<ModuleListItem key={data[0]} moduleID={data[0]} module={data[1]}/>
+		)
 
-		// return renderOut
-		renderModule = data => {
-
-			var renderOut = (
-				<ModuleListItem key={data[0]} moduleID={data[0]} module={data[1]}/>
-			)
-	
-			return renderOut
-		}
-	// }
+		return renderOut
+	}
 
 	deleteModule = async entry => {
 		const key = entry[0]
@@ -159,19 +131,20 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 		this.moduleID = props.moduleID
 		this.state = {
 			open: false,
-			courseID: props.module.courseID,
 			name: props.module.name,
 			nameInput: props.module.name,
 			type: props.module.type,
+			typeInput: props.module.type,
+			courseID: props.module.courseID,
 		}
 
 		this.getModuleReference()
 	}
 
 	async getModuleReference() {
-		console.log("Setting up modules listeners")
-		this.moduleRef = await firebase.getCourseModules(this.state.courseID)
-		console.log("refs?", this.moduleRef)
+		console.log("Setting up module listeners")
+		this.moduleRef = await firebase.getModuleRefByID(this.moduleID)
+
 		this.moduleRef.on('child_added', this.propertyAdded)
 
 		this.moduleRef.on('child_changed', this.propertyChanged)
@@ -180,7 +153,6 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 	}
 
 	propertyAdded = propertyData => {
-		console.log("PROPERTY ADDED CALLED")
 		console.log(propertyData.key, moduleKeys, propertyData.val(), propertyData.key in moduleKeys)
 		if (propertyData.key in moduleKeys) {
 			this.setState({
@@ -190,7 +162,6 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 	}
 
 	propertyChanged = propertyData => {
-		console.log("PROPERTY CHANGED CALLED")
 		console.log(propertyData.key, moduleKeys, propertyData.key in moduleKeys)
 		if (propertyData.key in moduleKeys) {
 			this.setState({
@@ -200,7 +171,6 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 	}
 
 	propertyRemoved = propertyData => {
-		console.log("PROPERTY REMOVED CALLED")
 		console.log(propertyData.key, moduleKeys, propertyData.key in moduleKeys)
 		if (propertyData.key in moduleKeys) {
 			this.setState({
@@ -225,8 +195,8 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 		this.setState({nameInput: event.target.value})
 	}
 
-	handleCourseDescription = event => {
-		this.setState({descriptionInput: event.target.value})
+	handleModuleType = event => {
+		this.setState({typeInput: event.target.value})
 	}
 
 	submitModuleName = async event => {
@@ -236,28 +206,23 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 		})
 	}
 
-	submitCourseDescription = async event => {
+	submitModuleType = async event => {
 		event.preventDefault()
-		await (await firebase.getCourseRefByID(this.moduleID)).update({
-			description: this.state.descriptionInput
+		await (await firebase.getModuleRefByID(this.moduleID)).update({
+			type: this.state.typeInput
 		})
 	}
 
 	getInnerControls = () => {
-		return (<ListItem key={this.state.name} button>
-			{
-				(
-					<ListItemSecondaryAction>
-						<IconButton edge="end" onClick={() => this.expand()}>
-							{this.state.open ? <ExpandLessRounded /> : <EditRounded />}
-						</IconButton>
-						<IconButton edge="end" color="secondary" onClick={() => this.deleteModule()}>
-							<DeleteRounded />
-						</IconButton>
-					</ListItemSecondaryAction>
-					)
-			}
-		</ListItem>
+		return (
+			<ListItemSecondaryAction>
+				<IconButton edge="end" onClick={() => this.expand()}>
+					{this.state.open ? <ExpandLessRounded /> : <EditRounded />}
+				</IconButton>
+				<IconButton edge="end" color="secondary" onClick={() => this.deleteModule()}>
+					<DeleteRounded />
+				</IconButton>
+			</ListItemSecondaryAction>
 		)
 	}
 
@@ -284,12 +249,12 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 							</form>
 						</ListItem>
 						<ListItem key={this.moduleID + "_description"} dense>
-							<form onSubmit={this.submitCourseDescription}>
+							<form onSubmit={this.submitModuleType}>
 								<TextField
 									required
 									id={this.moduleID+"_description"}
-									defaultValue={this.state.descriptionInput}
-									onChange={this.handleCourseDescription}
+									defaultValue={this.state.typeInput}
+									onChange={this.handleModuleType}
 									label="Edit Module Type"
 									variant="filled"
 									autoComplete="off"

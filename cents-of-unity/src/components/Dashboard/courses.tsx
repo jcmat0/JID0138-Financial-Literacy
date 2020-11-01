@@ -207,9 +207,6 @@ class CourseListItem extends React.Component<CourseDataProp> {
 		if (this.state.createdBy === firebase.auth.currentUser?.uid) {
 			return (
 				<ListItemSecondaryAction>
-					<IconButton edge="end" onClick={() => window.location.href = '/courseDashboard/' + this.courseID}>
-					<Button> Edit Modules </Button>
-					</IconButton>
 					<IconButton edge="end" color="secondary" onClick={() => this.deleteCourse()}>
 						<DeleteRounded />
 					</IconButton>
@@ -272,7 +269,7 @@ class CourseListItem extends React.Component<CourseDataProp> {
 	render() {
 		return (
 			<>
-				<ListItem key={this.courseID} button>
+				<ListItem key={this.courseID} button onClick={() => window.location.href = '/courseDashboard/' + this.courseID}>
 					<ListItemText
 						primary={this.state.name || "Invalid course"}
 						secondary={this.state.description || "No description"}
