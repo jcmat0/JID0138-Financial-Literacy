@@ -89,6 +89,29 @@ class Firebase {
 		return Promise.all([coursesPromise, usersPromise])
 	}
 
+	async createModule(name, uid, moduleType) {
+		if (!this.auth.currentUser || (await this.getCurrentUserRole() !== "professor")) {
+			return alert('Not authorized')
+		}
+
+		const newModuleID = uuidv4()
+
+		const modulesPromise = this.database.ref('modules/' + newModuleID).update({
+			"createdBy": this.auth.currentUser?.uid,
+			"courseID": uid,
+			"name": name,
+			"type": moduleType
+		})
+		const usersPromise = this.database.ref('users/' + this.auth.currentUser?.uid +'/modules').update({
+			[newModuleID]: true
+		})
+
+		const coursePromise = this.database.ref('courses/' + uid + '/modules').update({
+			[newModuleID]: true
+		})
+		return Promise.all([modulesPromise, usersPromise, coursePromise])
+	}
+
 	isInitialized() {
 		return new Promise(resolve => {
 			this.auth.onAuthStateChanged(resolve)
@@ -103,6 +126,10 @@ class Firebase {
 		return this.auth.currentUser && this.auth.currentUser.displayName
 	}
 
+	async getCourseData(uid) {
+		const courseData = await this.database.ref(`courses/${uid}`).once('value').then((snapshot) =>snapshot.val())
+		return courseData
+	}
 	async getCurrentUserPhone() {
 		const phone = await this.database.ref(`users/${this.auth.currentUser?.uid}/phone`).once('value').then(function(view) {
 			console.log(view.val())
@@ -131,12 +158,24 @@ class Firebase {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`)
 	}
 
+	async getCourseModules(cid) {
+		return this.database.ref(`courses/${cid}/modules`)
+	}
+
 	async getCurrentUserMembershipInCourseIDRef(id) {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses/${id}`)
 	}
 
+	async getModuleExistenceInCourseIDRef(courseID, moduleID) {
+		return this.database.ref(`courses/${courseID}/modules/${moduleID}`)
+	}
+
 	async getCourseRefByID(id) {
 		return this.database.ref(`courses/${id}`)
+	}
+
+	async getModuleRefByID(id) {
+		return this.database.ref(`modules/${id}`)
 	}
 
 	async updateUserEmail(email: string) {

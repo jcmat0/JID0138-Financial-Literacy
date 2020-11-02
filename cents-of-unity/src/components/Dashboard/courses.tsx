@@ -1,9 +1,10 @@
 import React from 'react'
-import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Collapse, FormControl, TextField } from '@material-ui/core'
+import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Collapse, FormControl, TextField, Button } from '@material-ui/core'
 import { EditRounded, DeleteRounded, ExpandLessRounded, CheckRounded } from '@material-ui/icons'
 import firebase from '../firebase'
+import CourseDashboard from '../CourseDashboard'
 
-interface Course {
+export interface Course {
 	name: string,
 	description?: string,
 	createdBy: string,
@@ -34,7 +35,7 @@ export class CourseList extends React.Component {
 	async getCoursesReference() {
 		console.log("Setting up course listeners")
 		this.courseRef = await firebase.getCurrentUserCoursesRef()
-
+		console.log('course_ref', this.courseRef)
 		this.courseRef.on('child_added', this.courseAdded)
 
 		this.courseRef.on('child_changed', this.courseChanged)
@@ -43,14 +44,15 @@ export class CourseList extends React.Component {
 	}
 
 	courseAdded = async courseData => {
+		console.log("courseData", courseData)
 		const newCourses = {
 			[courseData.key]: await firebase.getCourseRefByID(courseData.key).then(reference => {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
-
+		console.log("before", newCourses)
 		Object.assign(newCourses, this.state.courses)
-
+		console.log("after", newCourses)
 		this.setState({
 			courses: newCourses
 		})
@@ -62,9 +64,6 @@ export class CourseList extends React.Component {
 				return reference.once('value').then(snapshot => snapshot.val())
 			})
 		}
-
-		Object.assign(newCourses, this.state.courses)
-
 		this.setState({
 			courses: newCourses
 		})
@@ -83,7 +82,7 @@ export class CourseList extends React.Component {
 	renderCourse = data => {
 
 		var renderOut = (
-			<CourseListItem key={data[0]} courseID={data[0]} course={data[1]} />
+			<CourseListItem key={data[0]} courseID={data[0]} course={data[1]}/>
 		)
 
 		return renderOut
@@ -270,7 +269,7 @@ class CourseListItem extends React.Component<CourseDataProp> {
 	render() {
 		return (
 			<>
-				<ListItem key={this.courseID} button>
+				<ListItem key={this.courseID} button onClick={() => window.location.href = '/courseDashboard/' + this.courseID}>
 					<ListItemText
 						primary={this.state.name || "Invalid course"}
 						secondary={this.state.description || "No description"}
