@@ -53,6 +53,17 @@ function CourseDashboard(props) {
 				<Typography component="h1" variant="h4">
 						{ course.name }
 				</Typography>
+
+				<Button
+						type="submit"
+						//fullWidth
+						variant="contained"
+						color="primary"
+						onClick ={toRoster}
+						className={classes.submit}>
+						View Class Roster
+					</Button>
+
 				<Divider />
 				<Typography component="h1" variant="h5">
 						Modules
@@ -83,6 +94,7 @@ function CourseDashboard(props) {
 						className={classes.submit}>
 						Create New Module
 					</Button>
+
 				</form>
 			</Paper>
 		</main>
@@ -96,6 +108,10 @@ function CourseDashboard(props) {
 			alert(error.message)
 		}
 	}
+
+	async function toRoster() {
+		props.history.push('/Roster')
+	  }
 }
 
 // @ts-ignore
