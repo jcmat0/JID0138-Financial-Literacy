@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Collapse, FormControl, TextField, Button } from '@material-ui/core'
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import { EditRounded, DeleteRounded, ExpandLessRounded, CheckRounded } from '@material-ui/icons'
+import { Link } from 'react-router-dom'
 import firebase from '../firebase'
 
 type propType = {
@@ -195,8 +197,9 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 		this.setState({nameInput: event.target.value})
 	}
 
-	handleModuleType = event => {
-		this.setState({typeInput: event.target.value})
+	handleModuleType = (event, value) => {
+		console.log(value)
+		this.setState({typeInput: value})
 	}
 
 	submitModuleName = async event => {
@@ -229,45 +232,57 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 	getOuterControls = () => {
 		return (
 			<Collapse in={this.state.open} timeout="auto" unmountOnExit>
-					<List disablePadding dense>
-						<ListItem key={this.moduleID + "_name_control"} dense>
-							<form onSubmit={this.submitModuleName}>
-								<TextField
-									required
-									id={this.moduleID+"_name"}
-									defaultValue={this.state.nameInput}
-									onChange={this.handleModuleName}
-									label="Edit Module Name"
-									variant="filled"
-									autoComplete="off"
-								/>
-								<ListItemSecondaryAction>
-									<IconButton type="submit" edge="end" disabled={this.state.nameInput === ""}>
-										<CheckRounded />
-									</IconButton>
-								</ListItemSecondaryAction>
-							</form>
-						</ListItem>
-						<ListItem key={this.moduleID + "_description"} dense>
-							<form onSubmit={this.submitModuleType}>
-								<TextField
-									required
-									id={this.moduleID+"_description"}
-									defaultValue={this.state.typeInput}
+				<List disablePadding dense>
+					<ListItem key={this.moduleID + "_name_control"} dense>
+						<form onSubmit={this.submitModuleName}>
+							<TextField
+								required
+								id={this.moduleID+"_name"}
+								defaultValue={this.state.nameInput}
+								onChange={this.handleModuleName}
+								label="Edit Module Name"
+								variant="filled"
+								autoComplete="off"
+							/>
+							<ListItemSecondaryAction>
+								<IconButton type="submit" edge="end" disabled={this.state.nameInput === ""}>
+									<CheckRounded />
+								</IconButton>
+							</ListItemSecondaryAction>
+						</form>
+					</ListItem>
+					<ListItem key={this.moduleID + "_description"} dense>
+						<form onSubmit={this.submitModuleType}>
+							<FormControl margin="normal" required fullWidth>
+								<ToggleButtonGroup
+									id="select-module-type"
+									value={this.state.typeInput}
+									exclusive
 									onChange={this.handleModuleType}
-									label="Edit Module Type"
-									variant="filled"
-									autoComplete="off"
-									multiline
-								/>
-								<ListItemSecondaryAction>
-									<IconButton type="submit" edge="end">
-										<CheckRounded />
-									</IconButton>
-								</ListItemSecondaryAction>
-							</form>
-						</ListItem>
-					</List>
+								>
+									<ToggleButton value={"Lecture"}>Lecture</ToggleButton>
+									<ToggleButton value={"Simulation"}>Simulation</ToggleButton>
+								</ToggleButtonGroup>
+							</FormControl>
+							<ListItemSecondaryAction>
+								<IconButton type="submit" edge="end">
+									<CheckRounded />
+								</IconButton>
+							</ListItemSecondaryAction>
+						</form>
+					</ListItem>
+					<ListItem key={this.moduleID + "_edit_content_button"}>
+						<Button
+							fullWidth
+							variant="contained"
+							color="primary"
+							component={Link}
+							to={'/moduleEditor/' + this.moduleID} // change to link to the module edit page
+						>
+							Edit Content
+						</Button>
+					</ListItem>
+				</List>
 			</Collapse>
 		)
 	}

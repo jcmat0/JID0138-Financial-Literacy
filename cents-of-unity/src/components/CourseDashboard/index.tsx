@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import withStyles from '@material-ui/core/styles/withStyles'
 import { withRouter } from 'react-router-dom'
-import { Paper, Typography, Divider, FormControl, Input, InputLabel, Button } from '@material-ui/core'
+import { Paper, Card, Typography, Divider, FormControl, Grid, Input, InputLabel, Button } from '@material-ui/core'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import firebase from '../firebase'
+import CenteredGrid from '../centeredGrid'
 import { Course } from '../Dashboard/courses'
 import { ModuleList } from './modules'
 
@@ -26,9 +27,17 @@ const styles = theme => ({
 		alignItems: 'center',
 		padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 3}px ${theme.spacing.unit * 3}px`,
 	},
+	card: {
+		padding: theme.spacing.unit * 3,
+		width: '100%',
+	},
 	avatar: {
 		margin: theme.spacing.unit,
 		backgroundColor: theme.palette.secondary.main,
+	},
+	form: {
+		width: '100%', // Fix IE 11 issue.
+		marginTop: theme.spacing.unit,
 	},
 	submit: {
 		marginTop: theme.spacing.unit * 3,
@@ -47,46 +56,61 @@ function CourseDashboard(props) {
 		firebase.getCourseData(uid).then(setCourse)
 	}, [])
 	
-  return (
+	return (
 		<main className={classes.main}>
 			<Paper className={classes.paper}>
 				<Typography component="h1" variant="h4">
-						{ course.name }
+					{ course.name }
 				</Typography>
 				<Divider />
 				<Typography component="h1" variant="h5">
 						Modules
 				</Typography>
-				<ModuleList courseID={uid}/>
-				<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="course">Module Name</InputLabel>
-						<Input id="course" name="course" autoComplete="off" value={moduleName} onChange={e => setModuleName(e.target.value)}  />
-						<ToggleButtonGroup
-									id="demo-simple-select"
-									value={moduleType}
-									exclusive
-									onChange={(e, newValue) => setModuleType(newValue as string)}
+				<Card className={classes.card}>
+					<ModuleList courseID={uid}/>
+					<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
+						<Grid
+							container
+							direction="column"
+							alignItems="stretch"
 						>
-							<ToggleButton value={"lecture"}>Lecture</ToggleButton>
-							<ToggleButton value={"simulation"}>Simulation</ToggleButton>
-						</ToggleButtonGroup>
-					</FormControl>
+							<FormControl margin="normal" required fullWidth>
+								<InputLabel htmlFor="course">Module Name</InputLabel>
+								<Input id="course" name="course" autoComplete="off" value={moduleName} onChange={e => setModuleName(e.target.value)}  />
+							</FormControl>
 
-					<Button
-						type="submit"
-						fullWidth
-						variant="contained"
-						disabled={moduleName.length === 0}
-						color="primary"
-						onClick={createModule}
-						className={classes.submit}>
-						Create New Module
-					</Button>
-				</form>
+							<CenteredGrid item>
+								<FormControl margin="normal" required fullWidth>
+									<ToggleButtonGroup
+										id="select-module-type"
+										value={moduleType}
+										exclusive
+										onChange={(e, newValue) => setModuleType(newValue as string)}
+									>
+										<ToggleButton value={"Lecture"}>Lecture</ToggleButton>
+										<ToggleButton value={"Simulation"}>Simulation</ToggleButton>
+									</ToggleButtonGroup>
+								</FormControl>
+							</CenteredGrid>
+
+							<Button
+								type="submit"
+								fullWidth
+								variant="contained"
+								disabled={moduleName.length === 0}
+								color="primary"
+								onClick={createModule}
+								className={classes.submit}
+							>
+								Create New Module
+							</Button>
+						</Grid>
+					</form>
+				</Card>
 			</Paper>
 		</main>
 	)
+
 	async function createModule() {
 		try {
 			await firebase.createModule(moduleName, uid, moduleType)

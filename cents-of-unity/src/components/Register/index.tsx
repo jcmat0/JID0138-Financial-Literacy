@@ -4,8 +4,9 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import React, { useState } from 'react'
 import { Link, withRouter } from 'react-router-dom'
-import styled from 'styled-components'
 import firebase from '../firebase'
+import CenteredGrid from '../centeredGrid'
+
 const styles = theme => ({
 	main: {
 		width: 'auto',
@@ -37,11 +38,6 @@ const styles = theme => ({
 		marginTop: theme.spacing.unit * 3,
 	},
 })
-
-// awful hack, thanks material-ui
-const CenteredGrid = styled(Grid)`
-	align-self: center;
-`;
 
 function Register(props) {
 	const { classes } = props
@@ -94,7 +90,7 @@ function Register(props) {
 						<CenteredGrid item>
 							<FormControl margin="normal" required fullWidth>
 								<ToggleButtonGroup
-									id="demo-simple-select"
+									id="select-role"
 									value={role}
 									exclusive
 									onChange={(e, newValue) => setRole(newValue as string)}
@@ -112,9 +108,10 @@ function Register(props) {
 						variant="contained"
 						color="primary"
 						onClick={onRegister}
-						className={classes.submit}>
+						className={classes.submit}
+					>
 						Register
-          			</Button>
+					</Button>
 
 					<Button
 						type="submit"
@@ -123,9 +120,10 @@ function Register(props) {
 						color="secondary"
 						component={Link}
 						to="/login"
-						className={classes.submit}>
+						className={classes.submit}
+					>
 						Go back to Login
-          			</Button>
+					</Button>
 				</form>
 			</Paper>
 		</main>
