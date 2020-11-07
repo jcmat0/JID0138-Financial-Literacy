@@ -2,7 +2,6 @@ import app from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firebase-firestore'
 import 'firebase/firebase-database'
-import { v4 as uuidv4 } from 'uuid'
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const config = {
@@ -76,7 +75,8 @@ class Firebase {
 			return alert('Not authorized')
 		}
 
-		const newCourseID = uuidv4()
+		const newCourseRef = await this.database.ref('courses').push()
+		const newCourseID = newCourseRef.key as string
 
 		const coursesPromise = this.database.ref('courses/' + newCourseID).update({
 			"createdBy": this.auth.currentUser?.uid,
@@ -94,22 +94,28 @@ class Firebase {
 			return alert('Not authorized')
 		}
 
-		const newModuleID = uuidv4()
+		const newModuleRef = await this.database.ref('modules').push()
+		const newModuleID = newModuleRef.key as string
 
-		const modulesPromise = this.database.ref('modules/' + newModuleID).update({
+		const modulesPromise = newModuleRef.update({
 			"createdBy": this.auth.currentUser?.uid,
 			"courseID": uid,
 			"name": name,
 			"type": moduleType
 		})
-		const usersPromise = this.database.ref('users/' + this.auth.currentUser?.uid +'/modules').update({
-			[newModuleID]: true
-		})
 
 		const coursePromise = this.database.ref('courses/' + uid + '/modules').update({
 			[newModuleID]: true
 		})
-		return Promise.all([modulesPromise, usersPromise, coursePromise])
+		return Promise.all([modulesPromise, coursePromise])
+	}
+
+	async createContent(moduleID, content) {
+		if (!this.auth.currentUser || (await this.getCurrentUserRole() !== "professor")) {
+			return alert('Not authorized')
+		}
+
+		return this.database.ref('modules/' + moduleID + '/contents').push().update(content)
 	}
 
 	isInitialized() {
@@ -127,9 +133,15 @@ class Firebase {
 	}
 
 	async getCourseData(uid) {
-		const courseData = await this.database.ref(`courses/${uid}`).once('value').then((snapshot) =>snapshot.val())
+		const courseData = await this.database.ref(`courses/${uid}`).once('value').then((snapshot) => snapshot.val())
 		return courseData
 	}
+
+	async getModuleData(uid) {
+		const moduleData = await this.database.ref(`modules/${uid}`).once('value').then((snapshot) => snapshot.val())
+		return moduleData
+	}
+
 	async getCurrentUserPhone() {
 		const phone = await this.database.ref(`users/${this.auth.currentUser?.uid}/phone`).once('value').then(function(view) {
 			console.log(view.val())
