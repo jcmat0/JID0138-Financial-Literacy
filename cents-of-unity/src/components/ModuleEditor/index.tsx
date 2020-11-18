@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import CenteredGrid from '../centeredGrid'
+import firebase from '../firebase'
+import React, { useState, useMemo, useEffect } from 'react'
 import withStyles from '@material-ui/core/styles/withStyles'
+import { Course } from '../Dashboard/courses'
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import { withRouter } from 'react-router-dom'
 import { WithStyles, Paper, Card, Typography, Divider, FormControl, Grid, Input, InputLabel, Button, List, ListItem, ListItemText } from '@material-ui/core'
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
-import firebase from '../firebase'
-import CenteredGrid from '../centeredGrid'
-import { Course } from '../Dashboard/courses'
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import BalloonBlockEditor from '@ckeditor/ckeditor5-build-balloon-block';
+
 
 const styles = theme => ({
 	main: {
@@ -43,16 +46,11 @@ const styles = theme => ({
 	},
 })
 
-export interface ModuleContent {
-	type: string,
-	path: string,
-}
-
 export interface Module {
 	name: string,
 	type: string,
 	contents?: {
-		[key: string]: ModuleContent
+		[key: string]: string
 	},
 }
 
@@ -76,7 +74,10 @@ class ModuleEditor extends React.Component {
 	public props : Styles & ModuleEditorProps
 	public state : {
 		module: Module
-		tempContent: ModuleContent | null
+	}
+
+	private editorData : {
+		[key: string]: string
 	}
 
 	private moduleRef : any
@@ -84,7 +85,8 @@ class ModuleEditor extends React.Component {
 	constructor(props) {
 		super(props)
 		this.props = props
-		this.state = {module: emptyModule, tempContent: null}
+		this.state = {module: emptyModule}
+		this.editorData = {}
 		this.getModuleReference(props.moduleID)
 	}
 
@@ -118,36 +120,66 @@ class ModuleEditor extends React.Component {
 		this.setState({module: module})
 	}
 
-	renderContent(entry) {
+	setEditorValue = (contentKey, value) => {
+		this.editorData[contentKey] = value
+		console.log(this.editorData[contentKey])
+	}
+
+	updateContent = async (key) => {
+		const module = this.state.module
+		if (module.contents === undefined) {
+			module.contents = {}
+		}
+		module.contents[key] = this.editorData[key]
+		console.log(module, key, this.editorData[key])
+		await this.moduleRef.update(module)
+		this.setState({module: module})
+	}
+
+	renderContent = (entry) => {
 		const contentKey = entry[0]
 		const contentData = entry[1]
 
+		const disabled = this.editorData[contentKey] === ""
+
 		return (
-			<ListItem key={contentKey}>
-				<ListItemText
-					primary={contentData.type}
-					secondary={contentData.path}
+			<Paper className={this.props.classes.paper} key={"editor_"+contentKey}>
+				<CKEditor
+					editor={ BalloonBlockEditor }
+					data={contentData}
+					onReady={ editor => {
+						// You can store the "editor" and use when it is needed.
+						console.log( 'Editor is ready to use!', editor )
+					} }
+					onChange={ ( event, editor ) => {
+						const data = editor.getData()
+						this.setEditorValue(contentKey, data)
+					} }
+					onBlur={ ( event, editor ) => {
+						console.log( 'Blur.', editor )
+					} }
+					onFocus={ ( event, editor ) => {
+						console.log( 'Focus.', editor )
+					} }
 				/>
-			</ListItem>
+
+				<Button
+					type="submit"
+					fullWidth
+					variant="contained"
+					disabled={disabled}
+					color="primary"
+					onClick={() => this.updateContent(contentKey)}
+					className={this.props.classes.submit}
+				>
+					Update Content
+				</Button>
+			</Paper>
 		)
 	}
 
-	handleTempType = (event) => {
-		if (this.state.tempContent === null) return
-		const tempContent = this.state.tempContent
-		tempContent.type = event.target.value
-		this.setState({tempContent: tempContent})
-	}
-
-	handleTempPath = (event) => {
-		if (this.state.tempContent === null) return
-		const tempContent = this.state.tempContent
-		tempContent.path = event.target.value
-		this.setState({tempContent: tempContent})
-	}
-
 	createContent = async () => {
-		await firebase.createContent(this.props.moduleID, this.state.tempContent)
+		await firebase.createContent(this.props.moduleID)
 	}
 
 	render() {
@@ -157,34 +189,12 @@ class ModuleEditor extends React.Component {
 
 
 		if (this.state.module.contents === undefined || Object.keys(this.state.module.contents).length === 0) {
-			console.log(this.state.tempContent)
-			if (this.state.tempContent === null) {
-				this.state.tempContent = {
-					type: "",
-					path: ""
-				}
-			}
-
-			const disabled = this.state.tempContent.type === undefined || this.state.tempContent.type.length === 0
-			              || this.state.tempContent.path === undefined || this.state.tempContent.path.length === 0
-
 			return (
 				<>
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="type">Content Type</InputLabel>
-						<Input id="type" name="type" autoComplete="off" value={this.state.tempContent.type} onChange={this.handleTempType}  />
-					</FormControl>
-
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="path">Content Path</InputLabel>
-						<Input id="path" name="path" autoComplete="off" value={this.state.tempContent.path} onChange={this.handleTempPath}  />
-					</FormControl>
-
 					<Button
 						type="submit"
 						fullWidth
 						variant="contained"
-						disabled={disabled}
 						color="primary"
 						onClick={this.createContent}
 						className={this.props.classes.submit}
@@ -196,40 +206,58 @@ class ModuleEditor extends React.Component {
 		}
 
 		return (
-			<List>
-				{Object.entries(this.state.module.contents).map(this.renderContent)}
-			</List>
+			<>{Object.entries(this.state.module.contents).map(this.renderContent)}</>
 		)
 	}
 }
 
-function ModuleEditPage(props) {
-	const [module, setModule] = useState({} as Module)
-	const { classes } = props
-	const { uid } = props.match.params
+class ModuleEditPage extends React.Component {
+	public state : {
+		module: Module | null
+	}
+	private classes : {
+		[key: string]: string
+	}
+	private uid : string
 
-	useEffect(() => {
-		firebase.getModuleData(uid).then(setModule)
-	}, [])
+	constructor(props) {
+		super(props)
+		this.uid = props.match.params.uid
+		this.state = {module: null}
+		firebase.getModuleData(this.uid).then(module => {this.setState({module: module})})
+		console.log(props)
+		this.classes = props.classes
+	}
 
-	return (
-		<main className={classes.main}>
-			<Paper className={classes.paper}>
-				<Typography component="h1" variant="h4">
-					{ module.name }
-				</Typography>
-				<Typography component="h1" variant="h5">
-					{ module.type }
-				</Typography>
-			</Paper>
-			<Paper className={classes.paper}>
-				<Typography component="h1" variant="h5">
-					Contents
-				</Typography>
-				<ModuleEditor moduleID={uid} classes={classes} />
-			</Paper>
-		</main>
-	)
+	render() {
+		if (this.state.module === null) {
+			return (
+				<main className={this.classes.main}>
+					<Paper className={this.classes.paper}>
+						Please wait...
+					</Paper>
+				</main>
+			)
+		}
+
+		return (
+			<>
+				<main className={this.classes.main}>
+					<Paper className={this.classes.paper}>
+						<Typography component="h1" variant="h4">
+							{ this.state.module.name }
+						</Typography>
+						<Typography component="h1" variant="h5">
+							{ this.state.module.type }
+						</Typography>
+					</Paper>
+					<Paper className={this.classes.paper}>
+						<ModuleEditor moduleID={this.uid} classes={this.classes} />
+					</Paper>
+				</main>
+			</>
+		)
+	}
 }
 
 // @ts-ignore

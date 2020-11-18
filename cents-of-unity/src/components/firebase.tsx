@@ -110,12 +110,12 @@ class Firebase {
 		return Promise.all([modulesPromise, coursePromise])
 	}
 
-	async createContent(moduleID, content) {
+	async createContent(moduleID) {
 		if (!this.auth.currentUser || (await this.getCurrentUserRole() !== "professor")) {
 			return alert('Not authorized')
 		}
 
-		return this.database.ref('modules/' + moduleID + '/contents').push().update(content)
+		return this.database.ref('modules/' + moduleID + '/contents').push().update("Edit me!")
 	}
 
 	isInitialized() {
