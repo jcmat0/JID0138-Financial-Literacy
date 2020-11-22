@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import withStyles from '@material-ui/core/styles/withStyles'
 import { withRouter } from 'react-router-dom'
-import { Paper, Typography, Divider, FormControl, Input, InputLabel, Button } from '@material-ui/core'
+import { Paper, Typography, Divider, FormControl, Input, InputLabel, Button, Grid } from '@material-ui/core'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import firebase from '../firebase'
 import { Course } from '../Dashboard/courses'
+import { AddAlarmOutlined } from '@material-ui/icons'
 
 const styles = theme => ({
 	main: {
@@ -41,20 +42,47 @@ function Roster(props) {
 	const [moduleType, setModuleType] = useState('lecture')
 	const { classes } = props
 	const { uid } = props.match.params
-	
+	const [studentEmail, setStudentEmail] = useState('')
+
 	useEffect(() => {
 		firebase.getCourseData(uid).then(setCourse)
 	}, [])
+
+	const studentList : Promise<any>[] = []
+
+	const test = [1, 2]
+
 	
   return (
 		<main className={classes.main}>
 			<Paper className={classes.paper}>
 				<Typography component="h1" variant="h4">
-						{ course.name }
+						Course Roster
 				</Typography>
 			</Paper>
+			<Grid item>
+					<FormControl margin="normal" required fullWidth>
+						<InputLabel htmlFor="email">Student Email</InputLabel>
+							<Input id="email" name="email" autoComplete="off" autoFocus value={studentEmail} onChange={e => setStudentEmail(e.target.value)}/>
+						</FormControl>
+			</Grid>
+			<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						color="primary"
+						onClick={onAddStudent}
+						className={classes.submit}>
+						Add Student to Course
+          	</Button>
+				<ul>{test}</ul>
+  				<ul>{studentList}</ul>
 		</main>
   )
+
+async function onAddStudent() {
+	studentList.push(firebase.searchStudentByEmail(studentEmail))
+}
 
 }
 

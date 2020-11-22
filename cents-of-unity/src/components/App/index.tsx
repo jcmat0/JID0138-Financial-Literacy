@@ -4,6 +4,7 @@ import HomePage from '../HomePage'
 import Login from '../Login'
 import Register from '../Register'
 import Dashboard from '../Dashboard'
+import Roster from '../Roster'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import { CssBaseline, CircularProgress } from '@material-ui/core'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
@@ -34,6 +35,7 @@ export default function App() {
 					<Route exact path="/register" component={Register} />
 					<Route exact path="/dashboard" component={Dashboard} />
 					<Route path="/courseDashboard/:uid" render={(props) => <CourseDashboard {...props}/>}/>
+					<Route exact path="/Roster" component = {Roster}/>
 				</Switch>
 			</Router>
 		</MuiThemeProvider>

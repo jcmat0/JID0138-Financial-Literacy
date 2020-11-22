@@ -16,6 +16,25 @@ const config = {
   measurementId: "G-B2JSELNCVB"
 };
 
+var admin = require("firebase-admin");
+
+// Fetch the service account key JSON file contents
+var serviceAccount = require("path/to/../../../jid-0138-firebase-adminsdk-bfqn4-0cc5d6613f.json");
+
+// Initialize the app with a service account, granting admin privileges
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://jid-0138.firebaseio.com",
+  databaseAuthVariableOverride: null
+});
+
+// As an admin, the app has access to read and write all data, regardless of Security Rules
+var db = admin.database();
+var ref = db.ref("restricted_access/secret_document");
+ref.once("value", function(snapshot) {
+  console.log(snapshot.val());
+});
+
 class Firebase {
 	auth: app.auth.Auth;
 	db: app.firestore.Firestore;
@@ -180,6 +199,10 @@ class Firebase {
 
 	async updateUserEmail(email: string) {
 		return this.auth.currentUser && this.auth.currentUser.updateEmail(email)
+	}
+
+	async searchStudentByEmail(email: string) { 
+		return admin.auth().getUserByEmail(email).displayName
 	}
 
 	async updateUserPhone(phone) {
