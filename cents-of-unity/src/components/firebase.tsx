@@ -41,6 +41,7 @@ class Firebase {
 		console.log('created user', this.auth.currentUser)
 		this.database.ref(`/users/${this.auth.currentUser?.uid}`).set({
 			name,
+			email,
 		})
 		return this.auth.currentUser?.updateProfile({
 			displayName: name
@@ -169,6 +170,29 @@ class Firebase {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`).once('value').then((snapshot) => Object.keys(snapshot.val()))
 	}
 
+	async getCourseRoster(id) {
+		return this.database.ref(`courses/${id}/roster`).once('value').then((snapshot) => {
+			const value = snapshot.val()
+			console.log("Roster for course ID", id, "is", value)
+			if (value !== null && value !== undefined) {
+				return Object.keys(value)
+			}
+			return []
+		})
+	}
+
+	async addUserToRoster(courseID, email) {
+		const users = await this.getUsersByEmail(email)
+		for (const userID in users) {
+			this.database.ref(`courses/${courseID}/roster`).update({[userID]: true})
+			this.database.ref(`users/${userID}/courses`).update({[courseID]: true})
+		}
+	}
+
+	async removeUserFromRoster(courseID, userID) {
+		return Promise.all([this.database.ref(`courses/${courseID}/roster/${userID}`).remove(), this.database.ref(`users/${userID}/courses/${courseID}`).remove()])
+	}
+
 	async getCurrentUserCoursesRef() {
 		return this.database.ref(`users/${this.auth.currentUser?.uid}/courses`)
 	}
@@ -191,6 +215,15 @@ class Firebase {
 
 	async getModuleRefByID(id) {
 		return this.database.ref(`modules/${id}`)
+	}
+
+	getUserDataByID = async (id) => {
+		const user = await this.database.ref(`users/${id}`).once('value').then((snapshot) => Object.assign({}, snapshot.val(), {id: id}))
+		return user
+	}
+
+	getUsersByEmail = async (email) => {
+		return await this.database.ref(`users`).orderByChild('email').equalTo(email).once('value').then(snapshot => snapshot.val())
 	}
 
 	async updateUserEmail(email: string) {

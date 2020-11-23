@@ -7,6 +7,7 @@ import firebase from '../firebase'
 import CenteredGrid from '../centeredGrid'
 import { Course } from '../Dashboard/courses'
 import { ModuleList } from './modules'
+import { Roster } from './roster'
 
 const styles = theme => ({
 	main: {
@@ -109,6 +110,7 @@ function CourseDashboard(props) {
 						</form>
 					</Card>
 				</Paper>
+				<Roster courseID={uid} classes={classes}/>
 				<Paper className={classes.paper}>
 					<Button color="primary" variant="contained" onClick={() => window.location.href = '/dashboard'}>
 						Return to Dashboard
@@ -126,7 +128,7 @@ function CourseDashboard(props) {
 					</Typography>
 					<Divider />
 					<Typography component="h1" variant="h5">
-							Modules
+						Modules
 					</Typography>
 					<Card className={classes.card}>
 						<ModuleList courseID={uid}/>
