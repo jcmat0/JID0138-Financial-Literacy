@@ -5,7 +5,7 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import { Course } from '../Dashboard/courses'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import { withRouter } from 'react-router-dom'
-import { WithStyles, Paper, Card, Typography, Divider, FormControl, Grid, Input, InputLabel, Button, List, ListItem, ListItemText } from '@material-ui/core'
+import { WithStyles, Paper, Card, Typography, Divider, FormControl, Grid, Input, InputLabel, TextField, Button, List, ListItem, ListItemText } from '@material-ui/core'
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import BalloonBlockEditor from '@ckeditor/ckeditor5-build-balloon-block';
 
@@ -16,8 +16,8 @@ const styles = theme => ({
 		display: 'block', // Fix IE 11 issue.
 		marginLeft: theme.spacing.unit * 3,
 		marginRight: theme.spacing.unit * 3,
-		[theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
-			width: 400,
+		[theme.breakpoints.up(800 + theme.spacing.unit * 3 * 2)]: {
+			width: 800,
 			marginLeft: 'auto',
 			marginRight: 'auto',
 		},
@@ -49,8 +49,12 @@ const styles = theme => ({
 export interface Module {
 	name: string,
 	type: string,
+	courseID: string,
 	contents?: {
-		[key: string]: string
+		[key: string]: {
+			pageNum: number,
+			content: string,
+		}
 	},
 }
 
@@ -67,7 +71,8 @@ export interface Styles {
 
 const emptyModule = {
 	name: "",
-	type: ""
+	type: "",
+	courseID: "",
 }
 
 class ModuleEditor extends React.Component {
@@ -77,10 +82,14 @@ class ModuleEditor extends React.Component {
 	}
 
 	private editorData : {
-		[key: string]: string
+		[key: string]: {
+			pageNum: number,
+			content: string,
+		}
 	}
 
 	private moduleRef : any
+	private disabled : boolean
 
 	constructor(props) {
 		super(props)
@@ -88,6 +97,7 @@ class ModuleEditor extends React.Component {
 		this.state = {module: emptyModule}
 		this.editorData = {}
 		this.getModuleReference(props.moduleID)
+		this.disabled = false
 	}
 
 	async getModuleReference(id) {
@@ -106,23 +116,39 @@ class ModuleEditor extends React.Component {
 		const module = this.state.module
 		module[propertyData.key] = propertyData.val()
 		this.setState({module: module})
+		if (propertyData.key === 'contents' && this.state.module.contents !== undefined) {
+			this.editorData = this.state.module.contents
+		}
 	}
 
 	propertyChanged = propertyData => {
 		const module = this.state.module
 		module[propertyData.key] = propertyData.val()
 		this.setState({module: module})
+		if (propertyData.key === 'contents' && this.state.module.contents !== undefined) {
+			this.editorData = this.state.module.contents
+		}
 	}
 
 	propertyRemoved = propertyData => {
 		const module = this.state.module
 		delete module[propertyData.key]
 		this.setState({module: module})
+		if (propertyData.key === 'contents') {
+			this.editorData = {}
+		}
 	}
 
 	setEditorValue = (contentKey, value) => {
-		this.editorData[contentKey] = value
-		console.log(this.editorData[contentKey])
+		console.log("Updating content for content ID", contentKey)
+		this.editorData[contentKey].content = value
+		this.setState({})
+	}
+
+	setPageNumber = (contentKey, value) => {
+		console.log("Updating page for content ID", contentKey)
+		this.editorData[contentKey].pageNum = value
+		this.setState({})
 	}
 
 	updateContent = async (key) => {
@@ -130,17 +156,33 @@ class ModuleEditor extends React.Component {
 		if (module.contents === undefined) {
 			module.contents = {}
 		}
-		module.contents[key] = this.editorData[key]
-		console.log(module, key, this.editorData[key])
+		module.contents[key].content = this.editorData[key].content
+		module.contents[key].pageNum = this.editorData[key].pageNum
+		console.log(module, key, this.editorData[key].content, this.editorData[key].pageNum)
 		await this.moduleRef.update(module)
+		this.disabled = this.editorData[key].content === ""
 		this.setState({module: module})
+	}
+
+	deleteContent = async (key) => {
+		const module = this.state.module
+		if (module.contents !== undefined) {
+			delete this.editorData[key]
+			delete module.contents[key]
+			await this.moduleRef.update(module)
+			this.setState({module: module})
+		}
 	}
 
 	renderContent = (entry) => {
 		const contentKey = entry[0]
-		const contentData = entry[1]
+		const contentData = entry[1].content
 
-		const disabled = this.editorData[contentKey] === ""
+		if (this.editorData[contentKey] === undefined) {
+			return ""
+		} else {
+			this.disabled = this.editorData[contentKey].content === ""
+		}
 
 		return (
 			<Paper className={this.props.classes.paper} key={"editor_"+contentKey}>
@@ -163,16 +205,33 @@ class ModuleEditor extends React.Component {
 					} }
 				/>
 
+				<TextField
+					label="Page Number"
+					type="number"
+					variant="outlined"
+					value={this.editorData[contentKey].pageNum}
+					onChange={e => this.setPageNumber(contentKey, e.target.value)}
+				/>
+
 				<Button
 					type="submit"
-					fullWidth
 					variant="contained"
-					disabled={disabled}
+					disabled={this.disabled}
 					color="primary"
 					onClick={() => this.updateContent(contentKey)}
 					className={this.props.classes.submit}
 				>
 					Update Content
+				</Button>
+
+				<Button
+					type="submit"
+					variant="contained"
+					color="secondary"
+					onClick={() => this.deleteContent(contentKey)}
+					className={this.props.classes.submit}
+				>
+					Delete Content
 				</Button>
 			</Paper>
 		)
@@ -180,6 +239,7 @@ class ModuleEditor extends React.Component {
 
 	createContent = async () => {
 		await firebase.createContent(this.props.moduleID)
+		this.getModuleReference(this.props.moduleID)
 	}
 
 	render() {
@@ -187,26 +247,34 @@ class ModuleEditor extends React.Component {
 			return "No module found"
 		}
 
-
-		if (this.state.module.contents === undefined || Object.keys(this.state.module.contents).length === 0) {
+		if (this.state.module.contents === undefined) {
 			return (
-				<>
-					<Button
-						type="submit"
-						fullWidth
-						variant="contained"
-						color="primary"
-						onClick={this.createContent}
-						className={this.props.classes.submit}
-					>
-						Create Module Content
-					</Button>
-				</>
+				<Button
+					id="create_content_button"
+					type="submit"
+					variant="contained"
+					color="primary"
+					onClick={this.createContent}
+					className={this.props.classes.submit}
+				>
+					Create Module Content
+				</Button>
 			)
 		}
 
 		return (
-			<>{Object.entries(this.state.module.contents).map(this.renderContent)}</>
+			<>
+				{Object.entries(this.state.module.contents).map(this.renderContent)}
+				<Button
+					type="submit"
+					variant="contained"
+					color="primary"
+					onClick={this.createContent}
+					className={this.props.classes.submit}
+				>
+					Create Module Content
+				</Button>
+			</>
 		)
 	}
 }
@@ -230,7 +298,7 @@ class ModuleEditPage extends React.Component {
 	}
 
 	render() {
-		if (this.state.module === null) {
+		if (this.state.module === undefined || this.state.module === null) {
 			return (
 				<main className={this.classes.main}>
 					<Paper className={this.classes.paper}>
@@ -241,21 +309,24 @@ class ModuleEditPage extends React.Component {
 		}
 
 		return (
-			<>
-				<main className={this.classes.main}>
-					<Paper className={this.classes.paper}>
-						<Typography component="h1" variant="h4">
-							{ this.state.module.name }
-						</Typography>
-						<Typography component="h1" variant="h5">
-							{ this.state.module.type }
-						</Typography>
-					</Paper>
-					<Paper className={this.classes.paper}>
-						<ModuleEditor moduleID={this.uid} classes={this.classes} />
-					</Paper>
-				</main>
-			</>
+			<main className={this.classes.main}>
+				<Paper className={this.classes.paper}>
+					<Typography component="h1" variant="h4">
+						{ this.state.module.name }
+					</Typography>
+					<Typography component="h1" variant="h5">
+						{ this.state.module.type }
+					</Typography>
+				</Paper>
+				<Paper className={this.classes.paper}>
+					<ModuleEditor moduleID={this.uid} classes={this.classes} />
+				</Paper>
+				<Paper className={this.classes.paper}>
+					<Button color="primary" variant="contained" onClick={() => window.location.href = '/courseDashboard/' + this.state.module?.courseID}>
+						Return to Course Dashboard
+					</Button>
+				</Paper>
+			</main>
 		)
 	}
 }

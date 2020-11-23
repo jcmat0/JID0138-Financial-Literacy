@@ -115,7 +115,10 @@ class Firebase {
 			return alert('Not authorized')
 		}
 
-		return this.database.ref('modules/' + moduleID + '/contents').push().update("Edit me!")
+		return this.database.ref('modules/' + moduleID + '/contents').push().update({
+			pageNum: 0,
+			content: "Edit me!",
+		})
 	}
 
 	isInitialized() {

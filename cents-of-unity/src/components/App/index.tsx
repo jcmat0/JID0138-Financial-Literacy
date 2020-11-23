@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import firebase from '../firebase';
 import CourseDashboard from '../CourseDashboard'
 import ModuleEditPage from '../ModuleEditor'
+import ModuleView from '../ModuleView'
 
 const theme = createMuiTheme()
 
@@ -36,6 +37,7 @@ export default function App() {
 					<Route exact path="/dashboard" component={Dashboard} />
 					<Route path="/courseDashboard/:uid" render={(props) => <CourseDashboard {...props}/>}/>
 					<Route path="/moduleEditor/:uid" render={(props) => <ModuleEditPage {...props}/>}/>
+					<Route path="/module/:uid/:page" render={(props) => <ModuleView {...props}/>}/>
 				</Switch>
 			</Router>
 		</MuiThemeProvider>
