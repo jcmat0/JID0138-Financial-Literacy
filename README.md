@@ -26,6 +26,18 @@ https://classic.yarnpkg.com/en/docs/install
 - This project has multiple dependencies that will be installed during the Run process.
 ## Download instructions
 - Clone the repository by downloading and unzipping the file on https://github.com/jcmat0/JID0138-Financial-Literacy. Or use `$ git clone https://github.com/jcmat0/JID0138-Financial-Literacy.git` in a terminal/CMD.
+## Build Instructions
+- Run `$ yarn build` this will build a production version of this application. 
+- Run 
+```
+yarn global add serve
+serve -s build
+``` 
+  to run the production server. 
+  
+  The second command will tell you which port it is on.
+  
+  You can access this on your web server's address.
 ## Run instructions
 1. Navigate to the `cents-of-unity` folder within the repository in a Terminal/CMD
 2. Run `$ yarn` to install the necessary dependencies and libraries.
