@@ -36,3 +36,4 @@ https://classic.yarnpkg.com/en/docs/install
 - If `$ yarn` fails, delete the `node_modules/` folder and try again.
 - When installing node with "necessary tools", the operation may take a long time, but that is normal. **Do not terminate the operation early.**
 - If using chocolatey to install yarn, the output contains a lot of red text. This is normal.
+- If the `$ yarn start` command doesn't open automatically: Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
