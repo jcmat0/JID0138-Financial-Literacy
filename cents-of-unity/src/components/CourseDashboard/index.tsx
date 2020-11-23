@@ -55,61 +55,91 @@ function CourseDashboard(props) {
 	useEffect(() => {
 		firebase.getCourseData(uid).then(setCourse)
 	}, [])
-	
-	return (
-		<main className={classes.main}>
-			<Paper className={classes.paper}>
-				<Typography component="h1" variant="h4">
-					{ course.name }
-				</Typography>
-				<Divider />
-				<Typography component="h1" variant="h5">
-						Modules
-				</Typography>
-				<Card className={classes.card}>
-					<ModuleList courseID={uid}/>
-					<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
-						<Grid
-							container
-							direction="column"
-							alignItems="stretch"
-						>
-							<FormControl margin="normal" required fullWidth>
-								<InputLabel htmlFor="course">Module Name</InputLabel>
-								<Input id="course" name="course" autoComplete="off" value={moduleName} onChange={e => setModuleName(e.target.value)}  />
-							</FormControl>
 
-							<CenteredGrid item>
-								<FormControl margin="normal" required fullWidth>
-									<ToggleButtonGroup
-										id="select-module-type"
-										value={moduleType}
-										exclusive
-										onChange={(e, newValue) => setModuleType(newValue as string)}
-									>
-										<ToggleButton value={"Lecture"}>Lecture</ToggleButton>
-										<ToggleButton value={"Simulation"}>Simulation</ToggleButton>
-									</ToggleButtonGroup>
-								</FormControl>
-							</CenteredGrid>
-
-							<Button
-								type="submit"
-								fullWidth
-								variant="contained"
-								disabled={moduleName.length === 0}
-								color="primary"
-								onClick={createModule}
-								className={classes.submit}
+	if (course.createdBy === firebase.auth.currentUser?.uid) {
+		return (
+			<main className={classes.main}>
+				<Paper className={classes.paper}>
+					<Typography component="h1" variant="h4">
+						{ course.name }
+					</Typography>
+					<Divider />
+					<Typography component="h1" variant="h5">
+							Modules
+					</Typography>
+					<Card className={classes.card}>
+						<ModuleList courseID={uid}/>
+						<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
+							<Grid
+								container
+								direction="column"
+								alignItems="stretch"
 							>
-								Create New Module
-							</Button>
-						</Grid>
-					</form>
-				</Card>
-			</Paper>
-		</main>
-	)
+								<FormControl margin="normal" required fullWidth>
+									<InputLabel htmlFor="course">Module Name</InputLabel>
+									<Input id="course" name="course" autoComplete="off" value={moduleName} onChange={e => setModuleName(e.target.value)}  />
+								</FormControl>
+
+								<CenteredGrid item>
+									<FormControl margin="normal" required fullWidth>
+										<ToggleButtonGroup
+											id="select-module-type"
+											value={moduleType}
+											exclusive
+											onChange={(e, newValue) => setModuleType(newValue as string)}
+										>
+											<ToggleButton value={"Lecture"}>Lecture</ToggleButton>
+											<ToggleButton value={"Simulation"}>Simulation</ToggleButton>
+										</ToggleButtonGroup>
+									</FormControl>
+								</CenteredGrid>
+
+								<Button
+									type="submit"
+									fullWidth
+									variant="contained"
+									disabled={moduleName.length === 0}
+									color="primary"
+									onClick={createModule}
+									className={classes.submit}
+								>
+									Create New Module
+								</Button>
+							</Grid>
+						</form>
+					</Card>
+				</Paper>
+				<Paper className={classes.paper}>
+					<Button color="primary" variant="contained" onClick={() => window.location.href = '/dashboard'}>
+						Return to Dashboard
+					</Button>
+				</Paper>
+
+			</main>
+		)
+	} else {
+		return (
+			<main className={classes.main}>
+				<Paper className={classes.paper}>
+					<Typography component="h1" variant="h4">
+						{ course.name }
+					</Typography>
+					<Divider />
+					<Typography component="h1" variant="h5">
+							Modules
+					</Typography>
+					<Card className={classes.card}>
+						<ModuleList courseID={uid}/>
+					</Card>
+				</Paper>
+				<Paper className={classes.paper}>
+					<Button color="primary" variant="contained" onClick={() => window.location.href = '/dashboard'}>
+						Return to Dashboard
+					</Button>
+				</Paper>
+			</main>
+		)
+	}
 
 	async function createModule() {
 		try {

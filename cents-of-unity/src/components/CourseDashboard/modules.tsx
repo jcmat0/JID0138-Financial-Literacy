@@ -127,6 +127,7 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 	public state : any
 
 	private moduleRef : any
+	private courseCreatedBy : string
 
 	constructor(props) {
 		super(props)
@@ -140,7 +141,9 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 			courseID: props.module.courseID,
 		}
 
+		this.courseCreatedBy = ""
 		this.getModuleReference()
+		this.getCourseCreator()
 	}
 
 	async getModuleReference() {
@@ -152,6 +155,12 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 		this.moduleRef.on('child_changed', this.propertyChanged)
 
 		this.moduleRef.on('child_removed', this.propertyRemoved)
+	}
+
+	async getCourseCreator() {
+		console.log(this.courseCreatedBy)
+		this.courseCreatedBy = (await (await firebase.getCourseRefByID(this.state.courseID)).once('value').then(snapshot => snapshot.val())).createdBy
+		this.setState({})
 	}
 
 	propertyAdded = propertyData => {
@@ -290,14 +299,14 @@ class ModuleListItem extends React.Component<ModuleDataProp> {
 	render() {
 		return (
 			<>
-				<ListItem key={this.moduleID}>
+				<ListItem key={this.moduleID} button onClick={() => window.location.href = '/module/' + this.moduleID + '/1'}>
 					<ListItemText
 						primary={this.state.name || "Invalid module"}
 						secondary={this.state.type || "No type"}
 					/>
-					{this.getInnerControls()}
+					{(this.courseCreatedBy === firebase.auth.currentUser?.uid) ? this.getInnerControls() : ""}
 				</ListItem>
-				{this.getOuterControls()}
+				{(this.courseCreatedBy === firebase.auth.currentUser?.uid) ? this.getOuterControls() : ""}
 			</>
 		)
 	}
