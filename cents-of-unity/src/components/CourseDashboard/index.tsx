@@ -93,37 +93,7 @@ function CourseDashboard(props) {
 										</ToggleButtonGroup>
 									</FormControl>
 								</CenteredGrid>
-				</Typography>
 
-				<Button
-						type="submit"
-						//fullWidth
-						variant="contained"
-						color="primary"
-						onClick ={toRoster}
-						className={classes.submit}>
-						View Class Roster
-					</Button>
-
-				<Divider />
-				<Typography component="h1" variant="h5">
-						Modules
-				</Typography>
-				<ModuleList courseID={uid}/>
-				<form className={classes.form} id='form3' onSubmit={e =>  e.preventDefault() }>
-					<FormControl margin="normal" required fullWidth>
-						<InputLabel htmlFor="course">Module Name</InputLabel>
-						<Input id="course" name="course" autoComplete="off" value={moduleName} onChange={e => setModuleName(e.target.value)}  />
-						<ToggleButtonGroup
-									id="demo-simple-select"
-									value={moduleType}
-									exclusive
-									onChange={(e, newValue) => setModuleType(newValue as string)}
-						>
-							<ToggleButton value={"lecture"}>Lecture</ToggleButton>
-							<ToggleButton value={"simulation"}>Simulation</ToggleButton>
-						</ToggleButtonGroup>
-					</FormControl>
 								<Button
 									type="submit"
 									fullWidth
@@ -144,6 +114,7 @@ function CourseDashboard(props) {
 						Return to Dashboard
 					</Button>
 				</Paper>
+
 			</main>
 		)
 	} else {
@@ -170,10 +141,6 @@ function CourseDashboard(props) {
 		)
 	}
 
-				</form>
-			</Paper>
-		</main>
-	)
 	async function createModule() {
 		try {
 			await firebase.createModule(moduleName, uid, moduleType)
@@ -183,10 +150,6 @@ function CourseDashboard(props) {
 			alert(error.message)
 		}
 	}
-
-	async function toRoster() {
-		props.history.push('/Roster')
-	  }
 }
 
 // @ts-ignore

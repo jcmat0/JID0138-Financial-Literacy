@@ -8,14 +8,6 @@ export interface Course {
 	name: string,
 	description?: string,
 	createdBy: string,
-	roster: Array<Member>
-}
-
-class Member {
-	userID: any
-	constructor(userID) {
-		this.userID = userID;
-	}
 }
 
 interface CourseDataProp {
